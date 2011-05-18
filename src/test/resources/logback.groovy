@@ -9,8 +9,8 @@ import static ch.qos.logback.classic.Level.WARN
 
 appender("GELF", GelfAppender) {
     facility = "logback-gelf-test"
-    hostname = "localhost"
-    port = 12201
+    graylog2ServerHost = "localhost"
+    graylog2ServerPort = 12201
     useLoggerName = true
     additionalFields = [ipAddress:"_ip_address"]
 }
