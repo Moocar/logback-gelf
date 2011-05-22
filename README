@@ -52,7 +52,7 @@ Now, to include the ip address in the gelf message, i just add the following to 
 
     appender("GELF", GelfAppender) {
         ...
-        additionalFields = [identity:"_identity"]
+        additionalFields = [ipAddress:"_ip_address"]
         ...
     }
 
