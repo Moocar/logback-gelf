@@ -1,6 +1,8 @@
 package org.logbackgelf;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import ch.qos.logback.core.LayoutBase;
 import com.google.gson.FieldNamingPolicy;
@@ -79,10 +81,19 @@ public class GelfLayout<E> extends LayoutBase<E> {
 
         ILoggingEvent eventObject = (ILoggingEvent) event;
 
-        String fullMessage = eventObject.getMessage();
+        String message = eventObject.getFormattedMessage();
 
-        map.put("short_message", truncateToShortMessage(fullMessage));
-        map.put("full_message", fullMessage);
+        IThrowableProxy proxy = eventObject.getThrowableProxy();
+        if (proxy != null) {
+            map.put("full_message", truncateToLongMessage(message + "\n" + proxy.getClassName() + ": " + proxy.
+                    getMessage() + "\n" + toStackTraceString(proxy.getStackTraceElementProxyArray())));
+            map.put("short_message", truncateToShortMessage(message + ", " + proxy.getClassName() + ": " + proxy.
+                    getMessage()));
+        } else {
+            map.put("full_message", truncateToLongMessage(message));
+            map.put("short_message", truncateToShortMessage(message));
+        }
+
         map.put("timestamp", System.currentTimeMillis());
         map.put("version", "1.0");
         map.put("level", LevelToSyslogSeverity.convert(eventObject));
@@ -90,6 +101,14 @@ public class GelfLayout<E> extends LayoutBase<E> {
         additionalFields(map, eventObject);
 
         return map;
+    }
+
+    private String toStackTraceString(StackTraceElementProxy[] elements) {
+        StringBuilder str = new StringBuilder();
+        for (StackTraceElementProxy element : elements) {
+            str.append(element.getSTEAsString());
+        }
+        return str.toString();
     }
 
     private String getHostname() {
@@ -128,6 +147,13 @@ public class GelfLayout<E> extends LayoutBase<E> {
     private String truncateToShortMessage(String fullMessage) {
         if (fullMessage.length() > shortMessageLength) {
             return fullMessage.substring(0, shortMessageLength);
+        }
+        return fullMessage;
+    }
+
+    private String truncateToLongMessage(String fullMessage) {
+        if (fullMessage.length() > 4096) {
+            return fullMessage.substring(0, 4096);
         }
         return fullMessage;
     }
