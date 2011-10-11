@@ -3,19 +3,19 @@ package org.logbackgelf;
 import ch.qos.logback.core.AppenderBase;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
+ * Layout since the GELF format is static.
+ */
 public class GelfAppender<E> extends AppenderBase<E> {
 
+    private final Transport transport;
+
     // Defaults for variables up here
-    private final GelfLayout<E> gelfLayout;
     private String facility = "GELF";
     private String graylog2ServerHost = "localhost";
     private int graylog2ServerPort = 12201;
@@ -24,12 +24,66 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private int shortMessageLength = 255;
 
     public GelfAppender() {
-        this.gelfLayout = new GelfLayout<E>();
+
+        transport = new Transport();
     }
 
     /**
-     * Facility
-     * @return
+     * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
+     * to the log server
+     *
+     * @param eventObject The event that we are logging
+     */
+    @Override
+    protected void append(E eventObject) {
+
+        GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
+
+        try {
+
+            byte[] packet = gzipString(converter.convertToGelf(eventObject));
+
+            transport.sendPacket(packet, graylog2ServerHost, graylog2ServerPort);
+
+        } catch (RuntimeException e) {
+
+            this.addError("Error occurred: ", e);
+        }
+    }
+
+    /**
+     * zips up a string into a GZIP format.
+     *
+     * @param str The string to zip
+     * @return The zipped string
+     */
+    private byte[] gzipString(String str) {
+        GZIPOutputStream zipStream = null;
+        try {
+            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
+            zipStream = new GZIPOutputStream(targetStream);
+            zipStream.write(str.getBytes());
+            zipStream.close();
+            byte[] zipped = targetStream.toByteArray();
+            targetStream.close();
+            return zipped;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } finally {
+            try {
+                if (zipStream != null) {
+                    zipStream.close();
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    //////////////////// Property Getter/Setters (so they can be changed in config) /////////////////////////
+
+    /**
+     * The name of your service. Appears in facility column in graylog2-web-interface
      */
     public String getFacility() {
         return facility;
@@ -40,8 +94,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
-     * The hostname of the graylog2 server to connect to
-     * @return
+     * The hostname of the graylog2 server to send messages to
      */
     public String getGraylog2ServerHost() {
         return graylog2ServerHost;
@@ -52,8 +105,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
-     * The port of the graylog2 server to connect to
-     * @return
+     * The port of the graylog2 server to send messages to
      */
     public int getGraylog2ServerPort() {
         return graylog2ServerPort;
@@ -64,9 +116,8 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
-     * Specifies whether to add the additional field '_logger_name'. If true, then the appender will grab the loggerName from the
-     * eventObject. _logger_name value will be something like com.company.package.Foo.
-     * @return
+     * If true, an additional field call "_loggerName" will be added to each gelf message. Its contents will be the fully
+     * qualified name of the logger. e.g: com.company.Thingo.
      */
     public boolean isUseLoggerName() {
         return useLoggerName;
@@ -96,8 +147,6 @@ public class GelfAppender<E> extends AppenderBase<E> {
      * </code>
      * in the additionalFields map, the key is the name of the MDC to look up. the value is the name that should be given to
      * the key in the additional field in the gelf message.
-     *
-     * @return
      */
     public Map<String, String> getAdditionalFields() {
         return additionalFields;
@@ -109,7 +158,6 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     /**
      * The length of the message to truncate to
-     * @return
      */
     public int getShortMessageLength() {
         return shortMessageLength;
@@ -117,84 +165,5 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     public void setShortMessageLength(int shortMessageLength) {
         this.shortMessageLength = shortMessageLength;
-    }
-
-    @Override
-    protected void append(E eventObject) {
-        initDefaults();
-        try {
-            String message = gelfLayout.doLayout(eventObject);
-
-            byte[] data = gzipMessage(message);
-
-            send(data);
-
-        } catch (RuntimeException e) {
-            this.addError("Error occurred: ", e);
-        }
-    }
-
-    /**
-     * We have to forward on parameters to the GelfLayout. There may be a better way to do this.
-     */
-    private void initDefaults() {
-        gelfLayout.setFacility(facility);
-        gelfLayout.setUseLoggerName(useLoggerName);
-        gelfLayout.setAdditionalFields(additionalFields);
-        gelfLayout.setShortMessageLength(shortMessageLength);
-    }
-
-    private byte[] gzipMessage(String message) {
-        GZIPOutputStream zipStream = null;
-        try {
-            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
-            zipStream = new GZIPOutputStream(targetStream);
-            zipStream.write(message.getBytes());
-            zipStream.close();
-            byte[] zipped = targetStream.toByteArray();
-            targetStream.close();
-            return zipped;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            try {
-                zipStream.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
-    private void send(byte[] data) {
-        InetAddress address = getInetAddress(graylog2ServerHost);
-        DatagramPacket datagramPacket = new DatagramPacket(data, data.length, address, graylog2ServerPort);
-        sendPacket(datagramPacket);
-    }
-
-    private InetAddress getInetAddress(String hostname) {
-        try {
-            return InetAddress.getByName(hostname);
-        } catch (UnknownHostException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void sendPacket(DatagramPacket datagramPacket) {
-        DatagramSocket datagramSocket = getDatagramSocket();
-        try {
-            datagramSocket.send(datagramPacket);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            datagramSocket.close();
-        }
-    }
-
-    private DatagramSocket getDatagramSocket() {
-        try {
-            return new DatagramSocket();
-        } catch (SocketException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 }

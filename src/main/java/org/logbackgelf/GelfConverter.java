@@ -15,63 +15,50 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GelfLayout<E> extends LayoutBase<E> {
+/**
+ * Responsible for formatting a log event into a GELF message
+ */
+public class GelfConverter<E> {
+
+    private final String facility;
+    private final boolean useLoggerName;
+    private final Map<String, String> additionalFields;
+    private final int shortMessageLength;
 
     private final Gson gson;
-    private String facility;
-    private boolean useLoggerName;
-    private Map<String, String> additionalFields;
-    private int shortMessageLength;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public String getFacility() {
-        return facility;
-    }
+    public GelfConverter(String facility,
+                         boolean useLoggerName,
+                         Map<String, String> additionalFields,
+                         int shortMessageLength) {
 
-    public void setFacility(String facility) {
         this.facility = facility;
-    }
-
-    public boolean isUseLoggerName() {
-        return useLoggerName;
-    }
-
-    public void setUseLoggerName(boolean useLoggerName) {
         this.useLoggerName = useLoggerName;
-    }
-
-    public Map<String, String> getAdditionalFields() {
-        return additionalFields;
-    }
-
-    public void setAdditionalFields(Map<String, String> additionalFields) {
         this.additionalFields = additionalFields;
-    }
-
-    public int getShortMessageLength() {
-        return shortMessageLength;
-    }
-
-    public void setShortMessageLength(int shortMessageLength) {
         this.shortMessageLength = shortMessageLength;
-    }
 
-    public GelfLayout() {
+        // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         this.gson = gsonBuilder.create();
     }
 
-    @Override
-    public String doLayout(E event) {
+    public String convertToGelf(E event) {
         try {
-            return getJson(createMessage(event));
+            return gson.toJson(createMessage(event));
         } catch (RuntimeException e) {
             logger.error("Error creating JSON message", e);
             throw e;
         }
     }
 
+    /**
+     * Creates a map of properties that represent the GELF message.
+     *
+     * @param event The log event
+     * @return map of gelf properties
+     */
     private Map<String, Object> createMessage(E event) {
         Map<String, Object> map = new HashMap<String, Object>();
 
@@ -138,10 +125,6 @@ public class GelfLayout<E> extends LayoutBase<E> {
 
         }
 
-    }
-
-    private String getJson(Map<String, Object> gelfMessage) {
-        return gson.toJson(gelfMessage);
     }
 
     private String truncateToShortMessage(String fullMessage) {

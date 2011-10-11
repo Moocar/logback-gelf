@@ -4,6 +4,8 @@ LOGBACK-GELF - A GELF Appender for Logback
 Use this appender to log messages with logback to a Graylog2 server via GELF messages. It supports the basics of a GELF
 appender as well as additional fields. Chunked messages are not supported yet.
 
+If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
+
 To use with a maven project
 ---------------------------
 
@@ -52,9 +54,10 @@ Properties
 ----------
 
 *   **facility**: The name of your service. Appears in facility column in graylog2-web-interface. Defaults to "GELF"
-*   **graylog2ServerHost**: The host running your graylog2 server instance. Defaults to "localhost"
-*   **graylog2ServerPort**: The port that the graylog2 server is listening on. Defaults to 12201
-*   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents will be the fully qualified name of the logger. e.g: com.company.Thingo. Defaults to false;
+*   **graylog2ServerHost**: The hostname of the graylog2 server to send messages to. Defaults to "localhost"
+*   **graylog2ServerPort**: The port of the graylog2 server to send messages to. Defaults to 12201
+*   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents
+will be the fully qualified name of the logger. e.g: com.company.Thingo. Defaults to false;
 *   **additionalFields**: See additional fields below. Defaults to [] (empty)
 
 Additional Fields
