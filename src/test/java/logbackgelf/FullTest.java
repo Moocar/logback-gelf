@@ -17,9 +17,9 @@ public class FullTest {
         logger.debug("this is a test");
         logger.debug("this is a test with ({}) parameter", "this");
         try {
-            throw new IllegalStateException("moo") ;
+            throw new IllegalStateException("Expected exception") ;
         } catch (Exception e) {
-            logger.error("an error", e);
+            logger.error("expected error", e);
         }
     }
 }
