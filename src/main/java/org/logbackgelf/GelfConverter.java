@@ -44,7 +44,7 @@ public class GelfConverter<E> {
         this.gson = gsonBuilder.create();
     }
 
-    public String convertToGelf(E event) {
+    public String toGelf(E event) {
         try {
             return gson.toJson(createMessage(event));
         } catch (RuntimeException e) {

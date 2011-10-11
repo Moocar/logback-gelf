@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-public class FullTest {
+public class IntegrationTest {
 
     @Test
     public void test() {

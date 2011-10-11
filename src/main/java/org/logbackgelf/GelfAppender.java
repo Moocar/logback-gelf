@@ -1,11 +1,9 @@
 package org.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
@@ -13,70 +11,34 @@ import java.util.zip.GZIPOutputStream;
  */
 public class GelfAppender<E> extends AppenderBase<E> {
 
-    private final Transport transport;
-
     // Defaults for variables up here
     private String facility = "GELF";
     private String graylog2ServerHost = "localhost";
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
-    private Map<String, String> additionalFields = new HashMap<String, String>();
     private int shortMessageLength = 255;
-
-    public GelfAppender() {
-
-        transport = new Transport();
-    }
+    private Map<String, String> additionalFields = new HashMap<String, String>();
 
     /**
      * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
      * to the log server
      *
-     * @param eventObject The event that we are logging
+     * @param logEvent The event that we are logging
      */
     @Override
-    protected void append(E eventObject) {
+    protected void append(E logEvent) {
+
+        Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
 
         GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
 
         try {
 
-            byte[] packet = gzipString(converter.convertToGelf(eventObject));
-
-            transport.sendPacket(packet, graylog2ServerHost, graylog2ServerPort);
+            transport.send(converter.toGelf(logEvent));
 
         } catch (RuntimeException e) {
 
             this.addError("Error occurred: ", e);
-        }
-    }
-
-    /**
-     * zips up a string into a GZIP format.
-     *
-     * @param str The string to zip
-     * @return The zipped string
-     */
-    private byte[] gzipString(String str) {
-        GZIPOutputStream zipStream = null;
-        try {
-            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
-            zipStream = new GZIPOutputStream(targetStream);
-            zipStream.write(str.getBytes());
-            zipStream.close();
-            byte[] zipped = targetStream.toByteArray();
-            targetStream.close();
-            return zipped;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            try {
-                if (zipStream != null) {
-                    zipStream.close();
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
         }
     }
 
