@@ -36,9 +36,16 @@ public class IntegrationTest {
         logger.debug("this is a test with ({}) parameter", "this");
         logger.debug("This is a test with a really long ending: " + longMessage);
         try {
-            throw new IllegalStateException("Expected exception") ;
-        } catch (Exception e) {
+            throw new TestException("Expected exception") ;
+        } catch (TestException e) {
             logger.error("expected error", e);
+        }
+    }
+
+    private static class TestException extends RuntimeException {
+
+        public TestException(String msg) {
+            super(msg);
         }
     }
 

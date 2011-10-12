@@ -20,6 +20,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
     private int shortMessageLength = 255;
+    private int chunkThreshold = 1000;
     private Map<String, String> additionalFields = new HashMap<String, String>();
 
     /**
@@ -31,15 +32,20 @@ public class GelfAppender<E> extends AppenderBase<E> {
     @Override
     protected void append(E logEvent) {
 
-        Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
-
-        PacketCreator packetCreator = new PacketCreator(1000);
-
-        GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
-
         try {
+            Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
 
-            transport.send(packetCreator.go(gzipString(converter.toGelf(logEvent))));
+            PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold);
+
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
+
+            byte[] payload = gzipString(converter.toGelf(logEvent));
+
+            if (payload.length < chunkThreshold) {
+                transport.send(payload);
+            } else {
+                transport.send(payloadChunker.go(payload));
+            }
 
         } catch (RuntimeException e) {
 
