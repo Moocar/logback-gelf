@@ -1,9 +1,8 @@
 package org.logbackgelf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.*;
-import java.util.zip.GZIPOutputStream;
+import java.util.List;
 
 public class Transport {
 
@@ -18,41 +17,23 @@ public class Transport {
     /**
      * Sends a JSON GELF message to the graylog2 server
      *
-     * @param message The GELF Message (JSON)
+     * @param data gzipped GELF Message (JSON)
      */
-    public void send(String message) {
-        byte[] data = gzipString(message);
+    public void send(byte[] data) {
         InetAddress address = getInetAddress(host);
         DatagramPacket datagramPacket = new DatagramPacket(data, data.length, address, port);
         sendPacket(datagramPacket);
     }
 
     /**
-     * zips up a string into a GZIP format.
+     * Sends a JSON GELF message to the graylog2 server
      *
-     * @param str The string to zip
-     * @return The zipped string
+     * @param packets The packets to send over the wire
      */
-    private byte[] gzipString(String str) {
-        GZIPOutputStream zipStream = null;
-        try {
-            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
-            zipStream = new GZIPOutputStream(targetStream);
-            zipStream.write(str.getBytes());
-            zipStream.close();
-            byte[] zipped = targetStream.toByteArray();
-            targetStream.close();
-            return zipped;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            try {
-                if (zipStream != null) {
-                    zipStream.close();
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+    public void send(List<byte[]> packets) {
+        System.out.println("sending " + packets.size() + " packets");
+        for(byte[] packet : packets) {
+            send(packet);
         }
     }
 

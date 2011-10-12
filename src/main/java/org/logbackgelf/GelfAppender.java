@@ -2,8 +2,11 @@ package org.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
@@ -30,11 +33,13 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
         Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
 
+        PacketCreator packetCreator = new PacketCreator(1000);
+
         GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
 
         try {
 
-            transport.send(converter.toGelf(logEvent));
+            transport.send(packetCreator.go(gzipString(converter.toGelf(logEvent))));
 
         } catch (RuntimeException e) {
 
@@ -42,7 +47,36 @@ public class GelfAppender<E> extends AppenderBase<E> {
         }
     }
 
-    //////////////////// Property Getter/Setters (so they can be changed in config) /////////////////////////
+    /**
+     * zips up a string into a GZIP format.
+     *
+     * @param str The string to zip
+     * @return The zipped string
+     */
+    private byte[] gzipString(String str) {
+        GZIPOutputStream zipStream = null;
+        try {
+            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
+            zipStream = new GZIPOutputStream(targetStream);
+            zipStream.write(str.getBytes());
+            zipStream.close();
+            byte[] zipped = targetStream.toByteArray();
+            targetStream.close();
+            return zipped;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } finally {
+            try {
+                if (zipStream != null) {
+                    zipStream.close();
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+
 
     /**
      * The name of your service. Appears in facility column in graylog2-web-interface

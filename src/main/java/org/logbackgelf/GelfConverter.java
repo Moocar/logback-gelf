@@ -44,9 +44,9 @@ public class GelfConverter<E> {
         this.gson = gsonBuilder.create();
     }
 
-    public String toGelf(E event) {
+    public String toGelf(E logEvent) {
         try {
-            return gson.toJson(createMessage(event));
+            return gson.toJson(createMessage(logEvent));
         } catch (RuntimeException e) {
             logger.error("Error creating JSON message", e);
             throw e;
@@ -56,28 +56,28 @@ public class GelfConverter<E> {
     /**
      * Creates a map of properties that represent the GELF message.
      *
-     * @param event The log event
+     * @param logEvent The log event
      * @return map of gelf properties
      */
-    private Map<String, Object> createMessage(E event) {
+    private Map<String, Object> createMessage(E logEvent) {
         Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("facility", facility);
 
         map.put("host", getHostname());
 
-        ILoggingEvent eventObject = (ILoggingEvent) event;
+        ILoggingEvent eventObject = (ILoggingEvent) logEvent;
 
         String message = eventObject.getFormattedMessage();
 
         IThrowableProxy proxy = eventObject.getThrowableProxy();
         if (proxy != null) {
-            map.put("full_message", truncateToLongMessage(message + "\n" + proxy.getClassName() + ": " + proxy.
-                    getMessage() + "\n" + toStackTraceString(proxy.getStackTraceElementProxyArray())));
+            map.put("full_message", message + "\n" + proxy.getClassName() + ": " + proxy.
+                    getMessage() + "\n" + toStackTraceString(proxy.getStackTraceElementProxyArray()));
             map.put("short_message", truncateToShortMessage(message + ", " + proxy.getClassName() + ": " + proxy.
                     getMessage()));
         } else {
-            map.put("full_message", truncateToLongMessage(message));
+            map.put("full_message", message);
             map.put("short_message", truncateToShortMessage(message));
         }
 
@@ -130,13 +130,6 @@ public class GelfConverter<E> {
     private String truncateToShortMessage(String fullMessage) {
         if (fullMessage.length() > shortMessageLength) {
             return fullMessage.substring(0, shortMessageLength);
-        }
-        return fullMessage;
-    }
-
-    private String truncateToLongMessage(String fullMessage) {
-        if (fullMessage.length() > 4096) {
-            return fullMessage.substring(0, 4096);
         }
         return fullMessage;
     }
