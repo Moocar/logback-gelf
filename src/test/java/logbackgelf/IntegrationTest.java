@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.Random;
-import java.util.jar.JarEntry;
 
 public class IntegrationTest {
 
@@ -14,7 +13,7 @@ public class IntegrationTest {
 
     private static String createLongMessage() {
         Random rand = new Random();
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         for (int i=0; i< 1000; i++) {
             char theChar = (char)(rand.nextInt(30) + 65);
             for (int j=0; j < 80; j++) {

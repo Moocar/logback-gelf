@@ -1,9 +1,12 @@
 package logbackgelf;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.logbackgelf.ChunkFactory;
+import org.logbackgelf.MessageIdProvider;
 import org.logbackgelf.PayloadChunker;
+import org.mockito.Mock;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,28 +16,33 @@ import static org.junit.Assert.*;
 public class ChunkTest {
 
     private PayloadChunker createsPackets;
-    private static final int CHUNKED_GELF_ID_LENGTH = 2;
-    private static final int HEADER_LENGTH = CHUNKED_GELF_ID_LENGTH + PayloadChunker.MESSAGE_ID_LENGTH + 4;
+    private static final byte[] CHUNKED_GELF_ID = new byte[]{0x1e, 0x0f};
+    private static final int CHUNKED_GELF_ID_LENGTH = CHUNKED_GELF_ID.length;
+    public final static int SEQ_NUM_LENGTH = 2;
+    public final static int SEQ_LENGTH = 2;
+    public final static int MESSAGE_ID_LENGTH = 8;
+    private static final int HEADER_LENGTH = CHUNKED_GELF_ID_LENGTH + MESSAGE_ID_LENGTH + SEQ_NUM_LENGTH + SEQ_LENGTH;
+    private static final int DEFAULT_THRESHOLD = 3;
+    private static final int MAX_CHUNKS = 127;
 
     @Before
     public void setup() {
-
+        createsPackets = new PayloadChunker(DEFAULT_THRESHOLD, MAX_CHUNKS, new MessageIdProvider(MESSAGE_ID_LENGTH), new ChunkFactory(CHUNKED_GELF_ID, true));
     }
 
     @Test
     public void test1ByteMoreThanThreshold() {
-        int byteThreshold = 3;
-        createsPackets = new PayloadChunker(byteThreshold);
-        byte[] data = new byte[]{1,2,3,4,5};
-
-        List<byte[]> packets = createsPackets.go(data);
+        List<byte[]> packets = go(new byte[]{1,2,3,4,5});
 
         assertEquals(2, packets.size());
+
         byte[] firstPacket = packets.get(0);
-        assertTrue(3 != firstPacket.length);
-        assertEquals(3 + HEADER_LENGTH, firstPacket.length);
-        assertArrayEquals(PayloadChunker.CHUNKED_GELF_ID, Arrays.copyOfRange(firstPacket, 0, CHUNKED_GELF_ID_LENGTH));
+        assertTrue(DEFAULT_THRESHOLD != firstPacket.length);
+        assertEquals(DEFAULT_THRESHOLD + HEADER_LENGTH, firstPacket.length);
+
+        assertArrayEquals(CHUNKED_GELF_ID, Arrays.copyOfRange(firstPacket, 0, CHUNKED_GELF_ID_LENGTH));
         //System.out.println(Arrays.toString(firstPacket));
+
         int count = 0;
         for(byte[] packet : packets) {
             assertEquals(count, getSeqNumber(packets, count));
@@ -44,24 +52,21 @@ public class ChunkTest {
 
     }
 
-    private int getNumChunks(byte[] packet) {
-        return packet[2 + PayloadChunker.MESSAGE_ID_LENGTH + 3];
-    }
+    @Test
+    public void testThreeChunks() {
+        List<byte[]> packets = go(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-    private int getSeqNumber(List<byte[]> packets, int packetNum) {
-        return packets.get(packetNum)[2 + PayloadChunker.MESSAGE_ID_LENGTH + 1];
+        assertEquals(3, packets.size());
+
+        for(byte[] packet : packets) {
+            assertEquals(DEFAULT_THRESHOLD + HEADER_LENGTH, packet.length);
+        }
     }
 
     @Test
     public void testMessageIdsDifferent() {
-        int byteThreshold = 3;
-        createsPackets = new PayloadChunker(byteThreshold);
-
-        byte[] data1 = new byte[]{1,2,3,4,5,6};
-        byte[] data2 = new byte[]{1,2,3,4,5,6};
-
-        List<byte[]> packets1 = createsPackets.go(data1);
-        List<byte[]> packets2 = createsPackets.go(data2);
+        List<byte[]> packets1 = go(new byte[]{1,2,3,4,5,6});
+        List<byte[]> packets2 = go(new byte[]{1, 2, 3, 4, 5, 6});
 
         byte[] messageId1 = Arrays.copyOfRange(packets1.get(0), 2, 10);
         byte[] messageId2 = Arrays.copyOfRange(packets2.get(0), 2, 10);
@@ -70,16 +75,28 @@ public class ChunkTest {
     }
 
     @Test
-    public void testThreeChunks() {
-        int byteThreshold = 3;
-        createsPackets = new PayloadChunker(byteThreshold);
-        byte[] data = new byte[]{1,2,3,4,5,6,7,8,9};
+    public void shouldCutoffAfterMaxChunks() {
+        byte[] payload = createMassivePayload();
+        List<byte[]> packets = go(payload);
 
-        List<byte[]> packets = createsPackets.go(data);
+        assertEquals(MAX_CHUNKS, packets.size());
+    }
 
-        assertEquals(3, packets.size());
-        for(byte[] packet : packets) {
-            assertEquals(3 + HEADER_LENGTH, packet.length);
-        }
+    private byte[] createMassivePayload() {
+        byte[] massiveArray = new byte[(MAX_CHUNKS + 2) * DEFAULT_THRESHOLD];
+        Arrays.fill(massiveArray, (byte)9);
+        return massiveArray;
+    }
+
+    private List<byte[]> go(byte[] bytes) {
+        return createsPackets.go(bytes);
+    }
+
+    private int getNumChunks(byte[] packet) {
+        return packet[CHUNKED_GELF_ID.length + MESSAGE_ID_LENGTH + SEQ_NUM_LENGTH + SEQ_LENGTH - 1];
+    }
+
+    private int getSeqNumber(List<byte[]> packets, int packetNum) {
+        return packets.get(packetNum)[CHUNKED_GELF_ID.length + MESSAGE_ID_LENGTH + SEQ_NUM_LENGTH - 1];
     }
 }

@@ -21,6 +21,10 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private boolean useLoggerName = false;
     private int shortMessageLength = 255;
     private int chunkThreshold = 1000;
+    private String graylog2ServerVersion = "0.9.5";
+    private int messageIdLength = 32;
+    private boolean padSeq = true;
+    private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
     private Map<String, String> additionalFields = new HashMap<String, String>();
 
     /**
@@ -33,10 +37,16 @@ public class GelfAppender<E> extends AppenderBase<E> {
     protected void append(E logEvent) {
 
         try {
+
+            // Adhoc Dependency injection
             Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
-
-            PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold);
-
+            if (graylog2ServerVersion.equals("0.9.6")) {
+                messageIdLength = 8;
+                padSeq = false;
+            }
+            PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, 127,
+                    new MessageIdProvider(messageIdLength),
+                    new ChunkFactory(chunkedGelfId, padSeq));
             GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
 
             byte[] payload = gzipString(converter.toGelf(logEvent));
@@ -167,5 +177,13 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     public void setShortMessageLength(int shortMessageLength) {
         this.shortMessageLength = shortMessageLength;
+    }
+
+    public String getGraylog2ServerVersion() {
+        return graylog2ServerVersion;
+    }
+
+    public void setGraylog2ServerVersion(String graylog2ServerVersion) {
+        this.graylog2ServerVersion = graylog2ServerVersion;
     }
 }
