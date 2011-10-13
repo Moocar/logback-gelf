@@ -44,6 +44,12 @@ public class GelfConverter<E> {
         this.gson = gsonBuilder.create();
     }
 
+    /**
+     * Converts a log event into GELF JSON.
+     *
+     * @param logEvent The log event we're converting
+     * @return The log event converted into GELF JSON
+     */
     public String toGelf(E logEvent) {
         try {
             return gson.toJson(createMessage(logEvent));
@@ -70,6 +76,7 @@ public class GelfConverter<E> {
 
         String message = eventObject.getFormattedMessage();
 
+        // Format up the stack trace
         IThrowableProxy proxy = eventObject.getThrowableProxy();
         if (proxy != null) {
             map.put("full_message", message + "\n" + proxy.getClassName() + ": " + proxy.
@@ -82,7 +89,9 @@ public class GelfConverter<E> {
         }
 
         map.put("timestamp", System.currentTimeMillis());
+
         map.put("version", "1.0");
+
         map.put("level", LevelToSyslogSeverity.convert(eventObject));
 
         additionalFields(map, eventObject);
@@ -98,6 +107,9 @@ public class GelfConverter<E> {
         return str.toString();
     }
 
+    /**
+     * Retrieves the hostname of this server
+     */
     private String getHostname() {
         try {
             return InetAddress.getLocalHost().getHostName();
@@ -106,6 +118,11 @@ public class GelfConverter<E> {
         }
     }
 
+    /**
+     * Converts the additional fields into proper GELF JSON
+     *
+     * @param map The map of additional fields
+     */
     private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
 
         if (useLoggerName) {

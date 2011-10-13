@@ -26,11 +26,24 @@ public class PayloadChunker {
         this.chunkFactory = chunkFactory;
     }
 
-    public List<byte[]> go(byte[] payload) {
+    /**
+     * Converts a payload into a number of full GELF chunks.
+     *
+     * @param payload The original gzipped payload
+     * @return A list of chunks that should be sent to the graylog2 server
+     */
+    public List<byte[]> chunkIt(byte[] payload) {
 
         return createChunks(messageIdProvider.get(), splitPayload(payload));
     }
 
+    /**
+     * Converts each subPayload into a full GELF chunk
+     *
+     * @param messageId The unique messageId that all the produced chunks will use
+     * @param subPayloads The raw sub payload data.
+     * @return A list of each subPayload wrapped in a GELF chunk
+     */
     private List<byte[]> createChunks(byte[] messageId, List<byte[]> subPayloads) {
         List<byte[]> chunks = new ArrayList<byte[]>();
 
@@ -51,7 +64,7 @@ public class PayloadChunker {
      * Splits the payload data into chunks
      *
      * @param payload The full payload
-     * @return A list of chunks which when added together, make up the full payload
+     * @return A list of subPayloads which when added together, make up the full payload
      */
     private List<byte[]> splitPayload(byte[] payload) {
         List<byte[]> subPayloads = new ArrayList<byte[]>();

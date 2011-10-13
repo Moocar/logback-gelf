@@ -2,6 +2,9 @@ package org.logbackgelf;
 
 import java.util.Arrays;
 
+/**
+ * Responsible for wrapping a subPayload in a GELF Chunk
+ */
 public class ChunkFactory {
 
     private final byte[] CHUNKED_GELF_ID;
@@ -13,14 +16,14 @@ public class ChunkFactory {
     }
 
     /**
-     * Concatenates everything into a header and then appends the message content
+     * Concatenates everything into a GELF Chunk header and then appends the sub Payload
      */
-    public byte[] create(byte[] messageId, byte seqNum, byte numChunks, byte[] chunk) {
-        return  concatArrays(concatArrays(concatArrays(CHUNKED_GELF_ID, messageId), getSeqNums(seqNum, numChunks)), chunk);
+    public byte[] create(byte[] messageId, byte seqNum, byte numChunks, byte[] subPayload) {
+        return  concatArrays(concatArrays(concatArrays(CHUNKED_GELF_ID, messageId), getSeqNums(seqNum, numChunks)), subPayload);
     }
 
     /**
-     * Combines and flattens two arrays (non-desctructive)
+     * Returns array1 concatenated with array2 (non-destructive)
      *
      * @param array1 The first array
      * @param array2 The array to append to the end of the first

@@ -2,11 +2,9 @@ package logbackgelf;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.logbackgelf.ChunkFactory;
 import org.logbackgelf.MessageIdProvider;
 import org.logbackgelf.PayloadChunker;
-import org.mockito.Mock;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,7 +87,7 @@ public class ChunkTest {
     }
 
     private List<byte[]> go(byte[] bytes) {
-        return createsPackets.go(bytes);
+        return createsPackets.chunkIt(bytes);
     }
 
     private int getNumChunks(byte[] packet) {

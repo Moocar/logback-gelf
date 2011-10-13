@@ -2,11 +2,8 @@ package org.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
@@ -27,6 +24,8 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
     private Map<String, String> additionalFields = new HashMap<String, String>();
 
+    private Executor<E> executor;
+
     /**
      * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
      * to the log server
@@ -37,25 +36,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     protected void append(E logEvent) {
 
         try {
-
-            // Adhoc Dependency injection
-            Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
-            if (graylog2ServerVersion.equals("0.9.6")) {
-                messageIdLength = 8;
-                padSeq = false;
-            }
-            PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, 127,
-                    new MessageIdProvider(messageIdLength),
-                    new ChunkFactory(chunkedGelfId, padSeq));
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
-
-            byte[] payload = gzipString(converter.toGelf(logEvent));
-
-            if (payload.length < chunkThreshold) {
-                transport.send(payload);
-            } else {
-                transport.send(payloadChunker.go(payload));
-            }
+            executor.append(logEvent);
 
         } catch (RuntimeException e) {
 
@@ -63,36 +44,35 @@ public class GelfAppender<E> extends AppenderBase<E> {
         }
     }
 
-    /**
-     * zips up a string into a GZIP format.
-     *
-     * @param str The string to zip
-     * @return The zipped string
-     */
-    private byte[] gzipString(String str) {
-        GZIPOutputStream zipStream = null;
-        try {
-            ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
-            zipStream = new GZIPOutputStream(targetStream);
-            zipStream.write(str.getBytes());
-            zipStream.close();
-            byte[] zipped = targetStream.toByteArray();
-            targetStream.close();
-            return zipped;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            try {
-                if (zipStream != null) {
-                    zipStream.close();
-                }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+    @Override
+    public void start() {
+        super.start();
+        initExecutor();
     }
 
+    /**
+     * This is an ad-hoc dependency injection mechanism. We don't want create all these classes every time a message is
+     * logged. They will hang around for the lifetime of the appender.
+     */
+    private void initExecutor() {
 
+        Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
+
+        if (graylog2ServerVersion.equals("0.9.6")) {
+            messageIdLength = 8;
+            padSeq = false;
+        }
+
+        PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, 127,
+                new MessageIdProvider(messageIdLength),
+                new ChunkFactory(chunkedGelfId, padSeq));
+
+        GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
+
+        executor = new Executor<E>(transport, payloadChunker, converter, chunkThreshold);
+    }
+
+    //////////// Logback Property Getter/Setters ////////////////
 
     /**
      * The name of your service. Appears in facility column in graylog2-web-interface
