@@ -1,17 +1,21 @@
 package org.logbackgelf;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+/**
+ * Responsible for creating a unique Gelf messageId
+ */
 public class MessageIdProvider {
 
     private final int messageIdLength;
+    private final MessageDigest messageDigest;
+    private final String hostname;
 
-    public MessageIdProvider(int message_id_length) {
+    public MessageIdProvider(int message_id_length, MessageDigest messageDigest, String hostname) {
         messageIdLength = message_id_length;
+        this.messageDigest = messageDigest;
+        this.hostname = hostname;
     }
 
     /**
@@ -21,24 +25,13 @@ public class MessageIdProvider {
      * @return unique message ID
      */
     public byte[] get() {
-        try {
-            // Uniqueness is guaranteed by combining the hostname and the current nano second, hashing the result, and
-            // selecting the first 32 bytes of the result
-            String hostname = InetAddress.getLocalHost().getHostName();
-            String timestamp = String.valueOf(System.nanoTime());
 
-            byte[] digestString = (hostname + timestamp).getBytes();
+        // Uniqueness is guaranteed by combining the hostname and the current nano second, hashing the result, and
+        // selecting the first 32 bytes of the result
+        String timestamp = String.valueOf(System.nanoTime());
 
-            try {
-                MessageDigest digest = MessageDigest.getInstance("MD5");
+        byte[] digestString = (hostname + timestamp).getBytes();
 
-                return Arrays.copyOf(digest.digest(digestString), messageIdLength);
-            } catch (NoSuchAlgorithmException e) {
-
-                throw new IllegalStateException("Could not get handle on MD5 Digest for creating chunk message ID", e);
-            }
-        } catch (UnknownHostException e) {
-            throw new IllegalStateException("Cannot find hostname for creating chunk message ID", e);
-        }
+        return Arrays.copyOf(messageDigest.digest(digestString), messageIdLength);
     }
 }

@@ -24,6 +24,7 @@ public class GelfConverter<E> {
     private final boolean useLoggerName;
     private final Map<String, String> additionalFields;
     private final int shortMessageLength;
+    private final String hostname;
 
     private final Gson gson;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -31,12 +32,14 @@ public class GelfConverter<E> {
     public GelfConverter(String facility,
                          boolean useLoggerName,
                          Map<String, String> additionalFields,
-                         int shortMessageLength) {
+                         int shortMessageLength,
+                         String hostname) {
 
         this.facility = facility;
         this.useLoggerName = useLoggerName;
         this.additionalFields = additionalFields;
         this.shortMessageLength = shortMessageLength;
+        this.hostname = hostname;
 
         // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -70,7 +73,7 @@ public class GelfConverter<E> {
 
         map.put("facility", facility);
 
-        map.put("host", getHostname());
+        map.put("host", hostname);
 
         ILoggingEvent eventObject = (ILoggingEvent) logEvent;
 
@@ -105,17 +108,6 @@ public class GelfConverter<E> {
             str.append(element.getSTEAsString());
         }
         return str.toString();
-    }
-
-    /**
-     * Retrieves the hostname of this server
-     */
-    private String getHostname() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     /**

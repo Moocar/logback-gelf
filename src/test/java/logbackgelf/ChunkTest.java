@@ -6,6 +6,8 @@ import org.logbackgelf.ChunkFactory;
 import org.logbackgelf.MessageIdProvider;
 import org.logbackgelf.PayloadChunker;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,8 +26,8 @@ public class ChunkTest {
     private static final int MAX_CHUNKS = 127;
 
     @Before
-    public void setup() {
-        createsPackets = new PayloadChunker(DEFAULT_THRESHOLD, MAX_CHUNKS, new MessageIdProvider(MESSAGE_ID_LENGTH), new ChunkFactory(CHUNKED_GELF_ID, true));
+    public void setup() throws NoSuchAlgorithmException {
+        createsPackets = new PayloadChunker(DEFAULT_THRESHOLD, MAX_CHUNKS, new MessageIdProvider(MESSAGE_ID_LENGTH, MessageDigest.getInstance("MD5"), "localhost"), new ChunkFactory(CHUNKED_GELF_ID, true));
     }
 
     @Test

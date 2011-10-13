@@ -2,6 +2,8 @@ package org.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
 
+import java.net.InetAddress;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,18 +13,21 @@ import java.util.Map;
  */
 public class GelfAppender<E> extends AppenderBase<E> {
 
-    // Defaults for variables up here
+    // The following are configurable via logback configuration
     private String facility = "GELF";
     private String graylog2ServerHost = "localhost";
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
-    private int shortMessageLength = 255;
-    private int chunkThreshold = 1000;
     private String graylog2ServerVersion = "0.9.5";
+    private int chunkThreshold = 1000;
+    private Map<String, String> additionalFields = new HashMap<String, String>();
+
+    // The following are hidden (not configurable)
+    private int shortMessageLength = 255;
+    private final int maxChunks = 127;
     private int messageIdLength = 32;
     private boolean padSeq = true;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
-    private Map<String, String> additionalFields = new HashMap<String, String>();
 
     private Executor<E> executor;
 
@@ -56,20 +61,27 @@ public class GelfAppender<E> extends AppenderBase<E> {
      */
     private void initExecutor() {
 
-        Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
+        try {
 
-        if (graylog2ServerVersion.equals("0.9.6")) {
-            messageIdLength = 8;
-            padSeq = false;
+            Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
+
+            if (graylog2ServerVersion.equals("0.9.6")) {
+                messageIdLength = 8;
+                padSeq = false;
+            }
+
+            PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, maxChunks,
+                    new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), InetAddress.getLocalHost().getHostName()),
+                    new ChunkFactory(chunkedGelfId, padSeq));
+
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
+
+            executor = new Executor<E>(transport, payloadChunker, converter, chunkThreshold);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("Error initialising appender executor", e);
         }
-
-        PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, 127,
-                new MessageIdProvider(messageIdLength),
-                new ChunkFactory(chunkedGelfId, padSeq));
-
-        GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
-
-        executor = new Executor<E>(transport, payloadChunker, converter, chunkThreshold);
     }
 
     //////////// Logback Property Getter/Setters ////////////////
@@ -108,8 +120,8 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
-     * If true, an additional field call "_loggerName" will be added to each gelf message. Its contents will be the fully
-     * qualified name of the logger. e.g: com.company.Thingo.
+     * If true, an additional field call "_loggerName" will be added to each gelf message. Its contents will be the
+     * fully qualified name of the logger. e.g: com.company.Thingo.
      */
     public boolean isUseLoggerName() {
         return useLoggerName;
@@ -120,24 +132,12 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
-     * additional fields to add to the gelf message. Here's how these work:
-     * <br/>
-     * Let's take an example. I want to log the client's ip address of every request that comes into my web server. To do this,
-     * I add the ipaddress to the slf4j MDC on each request as follows:
-     * <code>
-     * ...
-     * MDC.put("ipAddress", "44.556.345.657");
-     * ...
-     * </code>
-     * Now, to include the ip address in the gelf message, i just add the following to my logback.groovy:
-     * <code>
-     * appender("GELF", GelfAppender) {
-     *   ...
-     *   additionalFields = [identity:"_identity"]
-     *   ...
-     * }
-     * </code>
-     * in the additionalFields map, the key is the name of the MDC to look up. the value is the name that should be given to
+     * additional fields to add to the gelf message. Here's how these work: <br/> Let's take an example. I want to log
+     * the client's ip address of every request that comes into my web server. To do this, I add the ipaddress to the
+     * slf4j MDC on each request as follows: <code> ... MDC.put("ipAddress", "44.556.345.657"); ... </code> Now, to
+     * include the ip address in the gelf message, i just add the following to my logback.groovy: <code>
+     * appender("GELF", GelfAppender) { ... additionalFields = [identity:"_identity"] ... } </code> in the
+     * additionalFields map, the key is the name of the MDC to look up. the value is the name that should be given to
      * the key in the additional field in the gelf message.
      */
     public Map<String, String> getAdditionalFields() {
@@ -165,5 +165,13 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     public void setGraylog2ServerVersion(String graylog2ServerVersion) {
         this.graylog2ServerVersion = graylog2ServerVersion;
+    }
+
+    public int getChunkThreshold() {
+        return chunkThreshold;
+    }
+
+    public void setChunkThreshold(int chunkThreshold) {
+        this.chunkThreshold = chunkThreshold;
     }
 }
