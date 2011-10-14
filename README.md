@@ -55,7 +55,7 @@ Properties
 
 *   **facility**: The name of your service. Appears in facility column in graylog2-web-interface. Defaults to "GELF"
 *   **graylog2ServerHost**: The hostname of the graylog2 server to send messages to. Defaults to "localhost"
-*   **graylog2ServerPort**: The port of the graylog2 server to send messages to. Defaults to 12201
+*   **graylog2ServerPort**: The graylog2ServerPort of the graylog2 server to send messages to. Defaults to 12201
 *   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents
 will be the fully qualified name of the logger. e.g: com.company.Thingo. Defaults to false;
 *   **additionalFields**: See additional fields below. Defaults to [] (empty)

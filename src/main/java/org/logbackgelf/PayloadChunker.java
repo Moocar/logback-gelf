@@ -50,6 +50,7 @@ public class PayloadChunker {
         byte seqNum = 0;
 
         for(byte[] subPayload : subPayloads) {
+
             if (seqNum == maxChunks) {
                 break;
             }

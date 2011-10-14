@@ -41,6 +41,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     protected void append(E logEvent) {
 
         try {
+
             appenderExecutor.append(logEvent);
 
         } catch (RuntimeException e) {
@@ -63,7 +64,9 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
         try {
 
-            Transport transport = new Transport(graylog2ServerHost, graylog2ServerPort);
+            InetAddress address = InetAddress.getByName(graylog2ServerHost);
+
+            Transport transport = new Transport(graylog2ServerPort, address);
 
             if (graylog2ServerVersion.equals("0.9.6")) {
                 messageIdLength = 8;
@@ -78,7 +81,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength, hostname);
 
-            appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, chunkThreshold);
+            appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
         } catch (Exception e) {
 

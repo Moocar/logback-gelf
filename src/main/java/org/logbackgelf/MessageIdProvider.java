@@ -27,7 +27,7 @@ public class MessageIdProvider {
     public byte[] get() {
 
         // Uniqueness is guaranteed by combining the hostname and the current nano second, hashing the result, and
-        // selecting the first 32 bytes of the result
+        // selecting the first x bytes of the result
         String timestamp = String.valueOf(System.nanoTime());
 
         byte[] digestString = (hostname + timestamp).getBytes();
