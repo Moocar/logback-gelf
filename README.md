@@ -45,6 +45,8 @@ The following assumes you are using groovy for your logback configuration.
         graylog2ServerHost = "localhost"
         graylog2ServerPort = 12201
         useLoggerName = true
+        graylog2ServerVersion = "0.9.6"
+        chunkThreshold = 1000
         additionalFields = [ipAddress:"_ip_address"]
     }
 
@@ -58,6 +60,10 @@ Properties
 *   **graylog2ServerPort**: The graylog2ServerPort of the graylog2 server to send messages to. Defaults to 12201
 *   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents
 will be the fully qualified name of the logger. e.g: com.company.Thingo. Defaults to false;
+*   **graylog2ServerVersion**: Specify which version the graylog2-server is. This is important because the GELF headers
+changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.5"
+*   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
+smaller packets. Defaults to 1000
 *   **additionalFields**: See additional fields below. Defaults to [] (empty)
 
 Additional Fields

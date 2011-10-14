@@ -8,6 +8,7 @@ appender("GELF", GelfAppender) {
     graylog2ServerPort = 12201
     useLoggerName = true
     graylog2ServerVersion = "0.9.5"
+    chunkThreshold = 1000
     additionalFields = [ipAddress:"_ip_address"]
 }
 
