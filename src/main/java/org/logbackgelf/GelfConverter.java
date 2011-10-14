@@ -10,8 +10,6 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +53,7 @@ public class GelfConverter<E> {
      */
     public String toGelf(E logEvent) {
         try {
-            return gson.toJson(createMessage(logEvent));
+            return gson.toJson(mapFields(logEvent));
         } catch (RuntimeException e) {
             logger.error("Error creating JSON message", e);
             throw e;
@@ -68,7 +66,7 @@ public class GelfConverter<E> {
      * @param logEvent The log event
      * @return map of gelf properties
      */
-    private Map<String, Object> createMessage(E logEvent) {
+    private Map<String, Object> mapFields(E logEvent) {
         Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("facility", facility);

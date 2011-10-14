@@ -70,11 +70,13 @@ public class GelfAppender<E> extends AppenderBase<E> {
                 padSeq = false;
             }
 
+            String hostname = InetAddress.getLocalHost().getHostName();
+
             PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, maxChunks,
-                    new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), InetAddress.getLocalHost().getHostName()),
+                    new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength);
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength, hostname);
 
             executor = new Executor<E>(transport, payloadChunker, converter, chunkThreshold);
 
