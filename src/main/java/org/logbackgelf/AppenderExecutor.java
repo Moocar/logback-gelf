@@ -4,15 +4,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
-public class Executor<E> {
+/**
+ * Converts a log event into a a payload or chunks and sends them to the graylog2-server
+ */
+public class AppenderExecutor<E> {
 
     private final Transport transport;
     private final PayloadChunker payloadChunker;
     private final GelfConverter gelfConverter;
     private final int chunkThreshold;
 
-    public Executor(Transport transport, PayloadChunker payloadChunker, GelfConverter gelfConverter,
-                    int chunkThreshold) {
+    public AppenderExecutor(Transport transport,
+                            PayloadChunker payloadChunker,
+                            GelfConverter gelfConverter,
+                            int chunkThreshold) {
         this.transport = transport;
         this.payloadChunker = payloadChunker;
         this.gelfConverter = gelfConverter;
@@ -29,9 +34,14 @@ public class Executor<E> {
 
         byte[] payload = gzipString(gelfConverter.toGelf(logEvent));
 
+        // If we can fit all the information into one packet, then just send it
         if (payload.length < chunkThreshold) {
+
             transport.send(payload);
+
+        // If the message is too long, then slice it up and send multiple packets
         } else {
+
             transport.send(payloadChunker.chunkIt(payload));
         }
     }

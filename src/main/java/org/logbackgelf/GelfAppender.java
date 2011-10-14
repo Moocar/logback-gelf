@@ -29,7 +29,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private boolean padSeq = true;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
 
-    private Executor<E> executor;
+    private AppenderExecutor<E> appenderExecutor;
 
     /**
      * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
@@ -41,7 +41,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     protected void append(E logEvent) {
 
         try {
-            executor.append(logEvent);
+            appenderExecutor.append(logEvent);
 
         } catch (RuntimeException e) {
 
@@ -78,11 +78,11 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength, hostname);
 
-            executor = new Executor<E>(transport, payloadChunker, converter, chunkThreshold);
+            appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, chunkThreshold);
 
         } catch (Exception e) {
 
-            throw new RuntimeException("Error initialising appender executor", e);
+            throw new RuntimeException("Error initialising appender appenderExecutor", e);
         }
     }
 
