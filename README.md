@@ -25,7 +25,7 @@ To use with a maven project
             <dependency>
                 <groupId>logback-gelf</groupId>
                 <artifactId>logback-gelf</artifactId>
-                <version>0.1</version>
+                <version>0.2</version>
             </dependency>
             ...
         </dependencies>
@@ -100,5 +100,5 @@ where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It s
 Examples
 --------
 
-Check out src/test/java/logbackgelf/FullTest.java. Just modify the src/test/resources/logback.groovy to point to your
-graylog2 server, and run the test. You should see the messages appearing in your graylog2 web interface.
+Check out src/test/java/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy to point to
+your graylog2 server, and run the test. You should see the messages appearing in your graylog2 web interface.
