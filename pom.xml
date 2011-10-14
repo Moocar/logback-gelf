@@ -6,7 +6,7 @@
     <groupId>logback-gelf</groupId>
     <artifactId>logback-gelf</artifactId>
     <packaging>jar</packaging>
-    <version>0.1</version>
+    <version>0.2</version>
     <name>logback-gelf</name>
 
     <description>GELF Appender for logback. Use this appender to log messages to a graylog2 server via GELF messages.</description>
@@ -49,18 +49,6 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>1.8.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
