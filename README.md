@@ -63,7 +63,7 @@ will be the fully qualified name of the logger. e.g: com.company.Thingo. Default
 changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.5"
 *   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
 smaller packets. Defaults to 1000
-*   **additionalFields**: See additional fields below. Defaults to [] (empty)
+*   **additionalFields**: See additional fields below. Defaults to empty
 
 Additional Fields
 -----------------
