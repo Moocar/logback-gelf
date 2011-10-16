@@ -1,8 +1,7 @@
 LOGBACK-GELF - A GELF Appender for Logback
 ==========================================
 
-Use this appender to log messages with logback to a Graylog2 server via GELF messages. It supports the basics of a GELF
-appender as well as additional fields. Chunked messages are not supported yet.
+Use this appender to log messages with logback to a Graylog2 server via GELF messages. Supports Additional Fields and chunking.
 
 If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
 
