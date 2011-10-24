@@ -8,9 +8,22 @@ If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://gr
 Install artifact to your maven repo
 -----------------------------------
 
-Hopefully one day this artifact will be in maven central, but until then, you have two options.
+I recommend using maven to get the artifact. Hopefully one day it will
+be in maven central, but until then, you have two options.
 
-### Option 1: Clone git and mvn install
+### Option 1: Add new repository
+
+Add the following repository to your pom.xml or settings.xml
+
+        <repositories>
+	        <repository>
+			    <releases><enabled>true</enabled></releases>
+                <id>Moocar</id>
+                <url>http://moocar.me/maven2</url>
+            </repository>
+        </repositories>
+
+### Option 2: Clone git and mvn install
 
 1. Clone git repo
 
@@ -20,12 +33,6 @@ Hopefully one day this artifact will be in maven central, but until then, you ha
 
         user:/tmp$ cd logback-gelf
         user:/tmp$ mvn install
-
-### Option 2: Add new repository
-
-Add the following repository to your pom.xml
-
-
 
 Add as project dependency
 -------------------------
