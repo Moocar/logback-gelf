@@ -3,32 +3,39 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>logback-gelf</groupId>
+    <groupId>me.moocar</groupId>
     <artifactId>logback-gelf</artifactId>
     <packaging>jar</packaging>
     <version>0.2</version>
     <name>logback-gelf</name>
-    <url>https://github.com/Moocar/logback-gelf</url>
+
 
     <description>GELF Appender for logback. Use this appender to log messages to a graylog2 server via GELF messages.</description>
 
+    <url>https://github.com/Moocar/logback-gelf</url>
+
     <inceptionYear>2011</inceptionYear>
 
-    <contributors>
-        <contributor>
-            <name>Anthony Marcar</name>
-            <email>anthony@grabbleapp.com</email>
-            <organization>Grabble</organization>
-            <organizationUrl>http://www.grabbleapp.com</organizationUrl>
-            <timezone>US/Pacific</timezone>
-        </contributor>
-    </contributors>
+    <licences>
+        <licence>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </licence>
+    </licences>
 
     <scm>
         <connection>scm:git:git@github.com:Moocar/logback-gelf.git</connection>
         <developerConnection>scm:git:git://github.com/Moocar/logback-gelf.git</developerConnection>
         <url>https://github.com/Moocar/logback-gelf</url>
     </scm>
+
+    <developers>
+        <developer>
+            <name>Anthony Marcar</name>
+            <email>anthony@moocar.me</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
