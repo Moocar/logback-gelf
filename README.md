@@ -5,19 +5,32 @@ Use this appender to log messages with logback to a Graylog2 server via GELF mes
 
 If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
 
-To use with a maven project
----------------------------
+Install artifact to your maven repo
+-----------------------------------
+
+Hopefully one day this artifact will be in maven central, but until then, you have two options.
+
+### Option 1: Clone git and mvn install
 
 1. Clone git repo
 
-        user:~$ git clone git://github.com/Moocar/logback-gelf.git
+        user:/tmp$ git clone git://github.com/Moocar/logback-gelf.git
 
 2.  install to local maven repo
 
-        user:~$ cd logback-gelf
-        user:~$ mvn install
+        user:/tmp$ cd logback-gelf
+        user:/tmp$ mvn install
 
-3.  Add as dependency to your project's pom.xml
+### Option 2: Add new repository
+
+Add the following repository to your pom.xml
+
+
+
+Add as project dependency
+-------------------------
+
+Add as dependency to your project's pom.xml
 
         <dependencies>
             ...

@@ -8,6 +8,7 @@
     <packaging>jar</packaging>
     <version>0.2</version>
     <name>logback-gelf</name>
+    <url>https://github.com/Moocar/logback-gelf</url>
 
     <description>GELF Appender for logback. Use this appender to log messages to a graylog2 server via GELF messages.</description>
 
@@ -22,6 +23,12 @@
             <timezone>US/Pacific</timezone>
         </contributor>
     </contributors>
+
+    <scm>
+        <connection>scm:git:git@github.com:Moocar/logback-gelf.git</connection>
+        <developerConnection>scm:git:git://github.com/Moocar/logback-gelf.git</developerConnection>
+        <url>https://github.com/Moocar/logback-gelf</url>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -52,7 +59,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -69,6 +76,17 @@
                 <version>2.5</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- be sure to add github.global.userName and  github.global.password to your profile properties in  settings.xml -->
+                <!-- run with mvn clean install ghDownloads:upload -->
+                <groupId>com.github.github</groupId>
+                <artifactId>downloads-maven-plugin</artifactId>
+                <version>0.2</version>
+                <configuration>
+                    <description>${project.version} release of ${project.name}</description>
+                    <override>false</override>
                 </configuration>
             </plugin>
         </plugins>
