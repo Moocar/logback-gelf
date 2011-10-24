@@ -1,4 +1,4 @@
-import org.logbackgelf.GelfAppender
+import me.moocar.logbackgelf.GelfAppender
 
 import static ch.qos.logback.classic.Level.DEBUG
 

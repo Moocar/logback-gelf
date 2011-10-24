@@ -1,4 +1,4 @@
-package logbackgelf;
+package me.moocar.logbackgelf;
 
 import org.junit.Test;
 import org.slf4j.Logger;

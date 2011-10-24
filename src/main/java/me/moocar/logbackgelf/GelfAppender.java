@@ -1,4 +1,4 @@
-package org.logbackgelf;
+package me.moocar.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
 

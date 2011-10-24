@@ -42,7 +42,7 @@ Add as dependency to your project's pom.xml
         <dependencies>
             ...
             <dependency>
-                <groupId>logback-gelf</groupId>
+                <groupId>me.moocar</groupId>
                 <artifactId>logback-gelf</artifactId>
                 <version>0.2</version>
             </dependency>
@@ -56,7 +56,7 @@ The following assumes you are using groovy for your logback configuration.
 
     /* src/main/resources/logback.groovy */
 
-    import org.logbackgelf.GelfAppender
+    import me.moocar.logbackgelf.GelfAppender
     import static ch.qos.logback.classic.Level.DEBUG
 
     appender("GELF", GelfAppender) {
@@ -119,5 +119,5 @@ where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It s
 Examples
 --------
 
-Check out src/test/java/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy to point to
+Check out src/test/java/me/moocar/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy to point to
 your graylog2 server, and run the test. You should see the messages appearing in your graylog2 web interface.

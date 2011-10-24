@@ -1,10 +1,7 @@
-package logbackgelf;
+package me.moocar.logbackgelf;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.logbackgelf.ChunkFactory;
-import org.logbackgelf.MessageIdProvider;
-import org.logbackgelf.PayloadChunker;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

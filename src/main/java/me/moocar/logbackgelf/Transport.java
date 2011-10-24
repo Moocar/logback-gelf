@@ -1,4 +1,4 @@
-package org.logbackgelf;
+package me.moocar.logbackgelf;
 
 import java.io.IOException;
 import java.net.*;

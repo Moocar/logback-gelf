@@ -1,4 +1,4 @@
-package org.logbackgelf;
+package me.moocar.logbackgelf;
 
 /**
  * Converts a log event into a a payload or chunks and sends them to the graylog2-server
