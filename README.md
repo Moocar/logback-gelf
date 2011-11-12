@@ -5,8 +5,7 @@ Use this appender to log messages with logback to a Graylog2 server via GELF mes
 
 If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
 
-In
-stall artifact to your maven repo
+Install artifact to your maven repo
 -----------------------------------
 
 I recommend using maven to get the artifact. Hopefully one day it will
@@ -67,10 +66,31 @@ The following assumes you are using groovy for your logback configuration.
         useLoggerName = true
         graylog2ServerVersion = "0.9.6"
         chunkThreshold = 1000
-        additionalFields = [ipAddress:"_ip_address"]
+        additionalFields = [ipAddress:"_ip_address", requestId:"_ip_address"]
     }
 
     root(DEBUG, ["GELF"])
+
+Or, if you're using logback.xml, here's the equivalent.
+
+    /* src/main/resources/logback.xml */
+
+    <configuration>
+        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+            <facility>logback-gelf-test</facility>
+            <graylog2ServerHost>localhost</graylog2ServerHost>
+            <graylog2ServerPort>12201</graylog2ServerPort>
+            <useLoggerName>true</useLoggerName>
+            <graylog2ServerVersion>0.9.5</graylog2ServerVersion>
+            <chunkThreshold>1000</chunkThreshold>
+            <additionalField>ipAddress:_ip_address</additionalField>
+            <additionalField>requestId:_request_id</additionalField>
+        </appender>
+
+        <root level="debug">
+            <appender-ref ref="GELF" />
+        </root>
+    </configuration>
 
 Properties
 ----------
@@ -115,10 +135,11 @@ The syntax for the additionalFields in logback.groovy is the following
 
     additionalFields = [<MDC Key>:<GELF Additional field name>, ...]
 
-where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It should also begin with an underscore
+where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It should also begin with an underscore (GELF standard)
 
 Examples
 --------
 
-Check out src/test/java/me/moocar/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy to point to
-your graylog2 server, and run the test. You should see the messages appearing in your graylog2 web interface.
+Check out src/test/java/me/moocar/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy or
+logback.xml to point to your graylog2 server, and run the test. You should see the messages appearing in your graylog2
+web interface.
