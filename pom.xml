@@ -6,7 +6,7 @@
     <groupId>me.moocar</groupId>
     <artifactId>logback-gelf</artifactId>
     <packaging>jar</packaging>
-    <version>0.2</version>
+    <version>0.2.1</version>
     <name>logback-gelf</name>
 
 

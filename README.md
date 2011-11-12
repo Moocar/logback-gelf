@@ -44,7 +44,7 @@ Add as dependency to your project's pom.xml
             <dependency>
                 <groupId>me.moocar</groupId>
                 <artifactId>logback-gelf</artifactId>
-                <version>0.2</version>
+                <version>0.2.1</version>
             </dependency>
             ...
         </dependencies>
