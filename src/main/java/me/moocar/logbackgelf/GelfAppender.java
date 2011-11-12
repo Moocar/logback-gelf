@@ -154,6 +154,24 @@ public class GelfAppender<E> extends AppenderBase<E> {
     }
 
     /**
+     * Add an additional field. This is mainly here for compatibility with logback.xml
+     *
+     * @param keyValue This must be in format key:value where key is the MDC key, and value is the GELF field
+     * name. e.g "ipAddress:_ip_address"
+     */
+    public void addAdditionalField(String keyValue) {
+        String[] splitted = keyValue.split(":");
+
+        if (splitted.length != 2) {
+
+            throw new IllegalArgumentException("additionalField must be of the format key:value, where key is the MDC "
+                    + "key, and value is the GELF field name. But found '" + keyValue + "' instead.");
+        }
+
+        additionalFields.put(splitted[0], splitted[1]);
+    }
+
+    /**
      * The length of the message to truncate to
      */
     public int getShortMessageLength() {

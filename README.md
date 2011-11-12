@@ -5,7 +5,8 @@ Use this appender to log messages with logback to a Graylog2 server via GELF mes
 
 If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
 
-Install artifact to your maven repo
+In
+stall artifact to your maven repo
 -----------------------------------
 
 I recommend using maven to get the artifact. Hopefully one day it will

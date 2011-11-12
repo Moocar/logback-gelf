@@ -1,0 +1,16 @@
+<configuration>
+  <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+    <facility>logback-gelf-test</facility>
+    <graylog2ServerHost>localhost</graylog2ServerHost>
+    <graylog2ServerPort>12201</graylog2ServerPort>
+    <useLoggerName>true</useLoggerName>
+    <graylog2ServerVersion>0.9.5</graylog2ServerVersion>
+    <chunkThreshold>1000</chunkThreshold>
+    <additionalField>ipAddress:_ip_address</additionalField>
+    <additionalField>requestId:_request_id</additionalField>
+  </appender>
+
+  <root level="debug">
+    <appender-ref ref="GELF" />
+  </root>
+</configuration>

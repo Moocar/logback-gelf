@@ -30,6 +30,7 @@ public class IntegrationTest {
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
         MDC.put("ipAddress", "87.345.23.55");
+        MDC.put("requestId", String.valueOf(new Random().nextInt(100000)));
 
         logger.debug("this is a new test");
         logger.debug("this is a test with ({}) parameter", "this");
