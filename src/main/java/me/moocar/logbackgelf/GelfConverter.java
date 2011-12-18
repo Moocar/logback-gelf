@@ -7,8 +7,6 @@ import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +21,7 @@ public class GelfConverter<E> {
     private final Map<String, String> additionalFields;
     private final int shortMessageLength;
     private final String hostname;
-
     private final Gson gson;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public GelfConverter(String facility,
                          boolean useLoggerName,
@@ -55,7 +51,7 @@ public class GelfConverter<E> {
         try {
             return gson.toJson(mapFields(logEvent));
         } catch (RuntimeException e) {
-            logger.error("Error creating JSON message", e);
+            System.err.println("Error creating JSON message: " + e.getMessage() + ": " + e.getStackTrace());
             throw e;
         }
     }

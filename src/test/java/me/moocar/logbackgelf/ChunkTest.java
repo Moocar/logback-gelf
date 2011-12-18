@@ -38,7 +38,6 @@ public class ChunkTest {
         assertEquals(DEFAULT_THRESHOLD + HEADER_LENGTH, firstPacket.length);
 
         assertArrayEquals(CHUNKED_GELF_ID, Arrays.copyOfRange(firstPacket, 0, CHUNKED_GELF_ID_LENGTH));
-        //System.out.println(Arrays.toString(firstPacket));
 
         int count = 0;
         for(byte[] packet : packets) {
