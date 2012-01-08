@@ -51,8 +51,7 @@ public class GelfConverter<E> {
         try {
             return gson.toJson(mapFields(logEvent));
         } catch (RuntimeException e) {
-            System.err.println("Error creating JSON message: " + e.getMessage() + ": " + e.getStackTrace());
-            throw e;
+            throw new IllegalStateException("Error creating JSON message", e);
         }
     }
 
@@ -108,6 +107,7 @@ public class GelfConverter<E> {
      * Converts the additional fields into proper GELF JSON
      *
      * @param map The map of additional fields
+     * @param eventObject The Logging event that we are converting to GELF
      */
     private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
 

@@ -1,8 +1,10 @@
 package me.moocar.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
+import com.google.common.base.Throwables;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +47,9 @@ public class GelfAppender<E> extends AppenderBase<E> {
             appenderExecutor.append(logEvent);
 
         } catch (RuntimeException e) {
-
+            System.out.println(e.getMessage() + ": " + Throwables.getStackTraceAsString(e));
             this.addError("Error occurred: ", e);
+            throw e;
         }
     }
 
@@ -64,7 +67,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
         try {
 
-            InetAddress address = InetAddress.getByName(graylog2ServerHost);
+            InetAddress address = getInetAddress();
 
             Transport transport = new Transport(graylog2ServerPort, address);
 
@@ -86,6 +89,20 @@ public class GelfAppender<E> extends AppenderBase<E> {
         } catch (Exception e) {
 
             throw new RuntimeException("Error initialising appender appenderExecutor", e);
+        }
+    }
+
+    /**
+     * Gets the Inet address for the graylog2ServerHost and gives a specialised error message if an exception is thrown
+     *
+     * @return The Inet address for graylog2ServerHost
+     */
+    private InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName(graylog2ServerHost);
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException("Unknown host: " + e.getMessage() +
+                    ". Make sure you have specified the 'graylog2ServerHost' property correctly in your logback.xml'");
         }
     }
 
