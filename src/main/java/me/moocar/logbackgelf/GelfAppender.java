@@ -26,7 +26,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
-    private final int maxChunks = 127;
+    private static final int maxChunks = 127;
     private int messageIdLength = 32;
     private boolean padSeq = true;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};

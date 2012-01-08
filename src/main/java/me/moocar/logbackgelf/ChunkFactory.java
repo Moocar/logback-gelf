@@ -17,10 +17,15 @@ public class ChunkFactory {
 
     /**
      * Concatenates everything into a GELF Chunk header and then appends the sub Payload
+     * @param messageId The message ID of the message (remains same for all chunks)
+     * @param seqNum The sequence number of the chunk
+     * @param numChunks The number of chunks that will be sent
+     * @param subPayload The actual data that will be sent in this chunk
+     * @return The complete chunk that wraps the sub pay load
      */
     public byte[] create(byte[] messageId, byte seqNum, byte numChunks, byte[] subPayload) {
 
-        return  concatArrays(concatArrays(concatArrays(chunkedGelfId, messageId), getSeqNums(seqNum, numChunks)), subPayload);
+        return  concatArrays(concatArrays(concatArrays(chunkedGelfId, messageId), getSeqNumbers(seqNum, numChunks)), subPayload);
     }
 
     /**
@@ -40,13 +45,13 @@ public class ChunkFactory {
     }
 
     /**
-     * Needed because apparently we need to pad this for 0.9.5??
+     * Returns an array of sequence numbers for each chunk. Needed because apparently we need to pad this for 0.9.5??
      *
-     * @param seqNum
-     * @param numChunks
-     * @return
+     * @param seqNum The Sequence Number
+     * @param numChunks The number of chunks that will be sent
+     * @return An array of sequence numbers for each chunk.
      */
-    private byte[] getSeqNums(byte seqNum, byte numChunks) {
+    private byte[] getSeqNumbers(byte seqNum, byte numChunks) {
 
         return padSeq ? new byte[]{0x00, seqNum, 0x00, numChunks} : new byte[]{seqNum, numChunks};
     }
