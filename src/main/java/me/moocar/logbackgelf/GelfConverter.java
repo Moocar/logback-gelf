@@ -84,7 +84,10 @@ public class GelfConverter<E> {
             map.put("short_message", truncateToShortMessage(message));
         }
 
-        map.put("timestamp", System.currentTimeMillis());
+        // Ever since version 0.9.6, GELF is accepts timestamps in decimal form.
+        double logEventTimeTimeStamp = ((ILoggingEvent) logEvent).getTimeStamp() / 1000.0;
+
+        map.put("timestamp", logEventTimeTimeStamp);
 
         map.put("version", "1.0");
 
