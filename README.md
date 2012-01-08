@@ -44,7 +44,7 @@ Add as dependency to your project's pom.xml
             <dependency>
                 <groupId>me.moocar</groupId>
                 <artifactId>logback-gelf</artifactId>
-                <version>0.2.1</version>
+                <version>0.9.6</version>
             </dependency>
             ...
         </dependencies>
@@ -81,7 +81,7 @@ Or, if you're using logback.xml, here's the equivalent.
             <graylog2ServerHost>localhost</graylog2ServerHost>
             <graylog2ServerPort>12201</graylog2ServerPort>
             <useLoggerName>true</useLoggerName>
-            <graylog2ServerVersion>0.9.5</graylog2ServerVersion>
+            <graylog2ServerVersion>0.9.6</graylog2ServerVersion>
             <chunkThreshold>1000</chunkThreshold>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
@@ -101,7 +101,7 @@ Properties
 *   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents
 will be the fully qualified name of the logger. e.g: com.company.Thingo. Defaults to false;
 *   **graylog2ServerVersion**: Specify which version the graylog2-server is. This is important because the GELF headers
-changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.5"
+changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.6"
 *   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
 smaller packets. Defaults to 1000
 *   **additionalFields**: See additional fields below. Defaults to empty
