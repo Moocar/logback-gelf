@@ -20,6 +20,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private String graylog2ServerHost = "localhost";
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
+    private boolean useThreadName = false;
     private String graylog2ServerVersion = "0.9.5";
     private int chunkThreshold = 1000;
     private Map<String, String> additionalFields = new HashMap<String, String>();
@@ -82,7 +83,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, additionalFields, shortMessageLength, hostname);
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname);
 
             appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
@@ -151,6 +152,18 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     public void setUseLoggerName(boolean useLoggerName) {
         this.useLoggerName = useLoggerName;
+    }
+    
+    /**
+     * If true, an additional field call "_threadName" will be added to each gelf message. Its contents will be the
+     * fully qualified name of the logger. e.g: com.company.Thingo.
+     */
+    public boolean isUseThreadName() {
+    	return useThreadName;
+    }
+    
+    public void setUseThreadName(boolean useThreadName) {
+    	this.useThreadName = useThreadName;
     }
 
     /**

@@ -18,6 +18,7 @@ public class GelfConverter<E> {
 
     private final String facility;
     private final boolean useLoggerName;
+    private final boolean useThreadName;
     private final Map<String, String> additionalFields;
     private final int shortMessageLength;
     private final String hostname;
@@ -25,12 +26,14 @@ public class GelfConverter<E> {
 
     public GelfConverter(String facility,
                          boolean useLoggerName,
+                         boolean useThreadName,
                          Map<String, String> additionalFields,
                          int shortMessageLength,
                          String hostname) {
 
         this.facility = facility;
         this.useLoggerName = useLoggerName;
+        this.useThreadName = useThreadName;
         this.additionalFields = additionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
@@ -116,6 +119,10 @@ public class GelfConverter<E> {
 
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
+        }
+        
+        if (useThreadName) {
+        	map.put("_threadName", eventObject.getThreadName());
         }
 
         Map<String, String> mdc = eventObject.getMDCPropertyMap();
