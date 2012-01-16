@@ -156,7 +156,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     
     /**
      * If true, an additional field call "_threadName" will be added to each gelf message. Its contents will be the
-     * fully qualified name of the logger. e.g: com.company.Thingo.
+     * Name of the thread. Defaults to "false".
      */
     public boolean isUseThreadName() {
     	return useThreadName;
