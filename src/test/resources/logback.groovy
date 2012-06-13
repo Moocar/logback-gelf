@@ -4,7 +4,7 @@ import static ch.qos.logback.classic.Level.DEBUG
 
 appender("GELF", GelfAppender) {
     facility = "logback-gelf-test"
-    graylog2ServerHost = "adm-grbl00.sv.walmartlabs.com"
+    graylog2ServerHost = "localhost"
     graylog2ServerPort = 12201
     useLoggerName = true
     graylog2ServerVersion = "0.9.6"
