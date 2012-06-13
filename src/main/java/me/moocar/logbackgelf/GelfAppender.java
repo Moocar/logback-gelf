@@ -1,8 +1,8 @@
 package me.moocar.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
-import com.google.common.base.Throwables;
 
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -48,10 +48,17 @@ public class GelfAppender<E> extends AppenderBase<E> {
             appenderExecutor.append(logEvent);
 
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage() + ": " + Throwables.getStackTraceAsString(e));
+            System.out.println(getStringStackTrace(e));
             this.addError("Error occurred: ", e);
             throw e;
         }
+    }
+
+    private String getStringStackTrace(Exception e) {
+        Writer result = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(result);
+        e.printStackTrace(printWriter);
+        return result.toString();
     }
 
     @Override
