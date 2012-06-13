@@ -5,39 +5,10 @@ Use this appender to log messages with logback to a Graylog2 server via GELF mes
 
 If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
 
-Install artifact to your maven repo
+Add Dependency
 -----------------------------------
 
-I recommend using maven to get the artifact. Hopefully one day it will
-be in maven central, but until then, you have two options.
-
-### Option 1: Add new repository
-
-Add the following repository to your pom.xml or settings.xml
-
-        <repositories>
-	        <repository>
-			    <releases><enabled>true</enabled></releases>
-                <id>Moocar</id>
-                <url>http://moocar.me/maven2</url>
-            </repository>
-        </repositories>
-
-### Option 2: Clone git and mvn install
-
-1. Clone git repo
-
-        user:/tmp$ git clone git://github.com/Moocar/logback-gelf.git
-
-2.  install to local maven repo
-
-        user:/tmp$ cd logback-gelf
-        user:/tmp$ mvn install
-
-Add as project dependency
--------------------------
-
-Add as dependency to your project's pom.xml
+I recommend using maven to get the artifact, which is now in maven central (as of June 13, 2012). Just add the dependency to your pom.xml.
 
         <dependencies>
             ...
@@ -64,7 +35,7 @@ The following assumes you are using groovy for your logback configuration.
         graylog2ServerHost = "localhost"
         graylog2ServerPort = 12201
         useLoggerName = true
-	useThreadName = true
+	    useThreadName = true
         graylog2ServerVersion = "0.9.6"
         chunkThreshold = 1000
         additionalFields = [ipAddress:"_ip_address", requestId:"_ip_address"]
