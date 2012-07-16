@@ -3,8 +3,6 @@ package me.moocar.logbackgelf;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -24,7 +22,6 @@ public class GelfConverter<E> {
     private final Map<String, String> additionalFields;
     private final int shortMessageLength;
     private final String hostname;
-    private final String messagePattern;
     private final Gson gson;
     private final PatternLayout patternLayout;
 
@@ -42,7 +39,6 @@ public class GelfConverter<E> {
         this.additionalFields = additionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
-        this.messagePattern = messagePattern;
 
         // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -83,21 +79,13 @@ public class GelfConverter<E> {
 
         ILoggingEvent eventObject = (ILoggingEvent) logEvent;
 
-        String message = eventObject.getFormattedMessage();
+        String message = patternLayout.doLayout(eventObject);
 
-        // Format up the stack trace
-        IThrowableProxy proxy = eventObject.getThrowableProxy();
-        if (proxy != null) {
-            map.put("full_message", patternLayout.doLayout(eventObject));
-            map.put("short_message", truncateToShortMessage(message + ", " + proxy.getClassName() + ": " + proxy.
-                    getMessage()));
-        } else {
-            map.put("full_message", message);
-            map.put("short_message", truncateToShortMessage(message));
-        }
+        map.put("full_message", message);
+        map.put("short_message", truncateToShortMessage(message));
 
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
-        double logEventTimeTimeStamp = ((ILoggingEvent) logEvent).getTimeStamp() / 1000.0;
+        double logEventTimeTimeStamp = eventObject.getTimeStamp() / 1000.0;
 
         map.put("timestamp", logEventTimeTimeStamp);
 
@@ -108,14 +96,6 @@ public class GelfConverter<E> {
         additionalFields(map, eventObject);
 
         return map;
-    }
-
-    private String toStackTraceString(StackTraceElementProxy[] elements) {
-        StringBuilder str = new StringBuilder();
-        for (StackTraceElementProxy element : elements) {
-            str.append(element.getSTEAsString());
-        }
-        return str.toString();
     }
 
     /**
