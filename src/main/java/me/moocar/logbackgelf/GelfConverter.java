@@ -1,5 +1,7 @@
 package me.moocar.logbackgelf;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
@@ -22,14 +24,17 @@ public class GelfConverter<E> {
     private final Map<String, String> additionalFields;
     private final int shortMessageLength;
     private final String hostname;
+    private final String messagePattern;
     private final Gson gson;
+    private final PatternLayout patternLayout;
 
     public GelfConverter(String facility,
                          boolean useLoggerName,
                          boolean useThreadName,
                          Map<String, String> additionalFields,
                          int shortMessageLength,
-                         String hostname) {
+                         String hostname,
+                         String messagePattern) {
 
         this.facility = facility;
         this.useLoggerName = useLoggerName;
@@ -37,11 +42,16 @@ public class GelfConverter<E> {
         this.additionalFields = additionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
+        this.messagePattern = messagePattern;
 
         // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         this.gson = gsonBuilder.create();
+        this.patternLayout = new PatternLayout();
+        this.patternLayout.setContext(new LoggerContext());
+        this.patternLayout.setPattern(messagePattern);
+        this.patternLayout.start();
     }
 
     /**
@@ -78,8 +88,7 @@ public class GelfConverter<E> {
         // Format up the stack trace
         IThrowableProxy proxy = eventObject.getThrowableProxy();
         if (proxy != null) {
-            map.put("full_message", message + "\n" + proxy.getClassName() + ": " + proxy.
-                    getMessage() + "\n" + toStackTraceString(proxy.getStackTraceElementProxyArray()));
+            map.put("full_message", patternLayout.doLayout(eventObject));
             map.put("short_message", truncateToShortMessage(message + ", " + proxy.getClassName() + ": " + proxy.
                     getMessage()));
         } else {

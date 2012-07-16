@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.net.URL;
 import java.util.Random;
 
 public class IntegrationTest {
@@ -34,11 +35,11 @@ public class IntegrationTest {
 
         logger.debug("this is a new test");
         logger.debug("this is a test with ({}) parameter", "this");
-        logger.debug("This is a test with a really long ending: " + longMessage);
+        //logger.debug("This is a test with a really long ending: " + longMessage);
         try {
-            throw new TestException("Expected exception") ;
-        } catch (TestException e) {
-            logger.error("expected error", e);
+            new URL("app://asdfs");
+        } catch (Exception e) {
+            logger.error("expected error", new IllegalStateException(e));
         }
     }
 

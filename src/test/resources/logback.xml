@@ -6,6 +6,7 @@
     <useLoggerName>true</useLoggerName>
     <graylog2ServerVersion>0.9.5</graylog2ServerVersion>
     <chunkThreshold>1000</chunkThreshold>
+    <messagePattern>%rEx</messagePattern>
     <additionalField>ipAddress:_ip_address</additionalField>
     <additionalField>requestId:_request_id</additionalField>
   </appender>
