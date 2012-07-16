@@ -9,6 +9,7 @@ appender("GELF", GelfAppender) {
     useLoggerName = true
     graylog2ServerVersion = "0.9.6"
     chunkThreshold = 1000
+    messagePattern = "%ex"
     additionalFields = [ipAddress:"_ip_address", requestId:"_request_id", contextName:"_context_name"]
 }
 
