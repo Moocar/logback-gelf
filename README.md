@@ -27,7 +27,7 @@ Configuring Logback
 
 Add the following to your logback.xml configuration file.
 
-    /* [src/main/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml) */
+[src/main/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml)
 
     <configuration>
         <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
@@ -66,7 +66,7 @@ changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.
 *   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
 smaller packets. Defaults to 1000
 *   **messagePattern**: The layout of the actual message according to
-[PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout). Defaults to "%m%rEx"
+[PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to "%m%rEx"
 *   **additionalFields**: See additional fields below. Defaults to empty
 
 Additional Fields
@@ -86,7 +86,6 @@ logback-gelf to look out for this mapping every time a message is logged.
 
 2.  Inform logback-gelf of MDC mapping
 
-        /* [src/main/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml) */
         ...
         <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
             ...
