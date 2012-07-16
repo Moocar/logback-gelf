@@ -35,12 +35,12 @@ public class IntegrationTest {
 
         logger.debug("this is a new test");
         logger.debug("this is a test with ({}) parameter", "this");
-        //logger.debug("This is a test with a really long ending: " + longMessage);
         try {
             new URL("app://asdfs");
         } catch (Exception e) {
             logger.error("expected error", new IllegalStateException(e));
         }
+        logger.debug("This is a test with a really long ending: " + longMessage);
     }
 
     private static class TestException extends RuntimeException {

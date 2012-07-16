@@ -49,7 +49,7 @@ Add the following to your logback.xml configuration file.
     </configuration>
 
 If you're using groovy configuration, checkout the
-[logback.groovy](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.groovy) example.
+[logback.groovy](https://github.com/Moocar/logback-gelf/blob/master/sample.logback.groovy) example.
 
 Properties
 ----------
