@@ -3,12 +3,14 @@ LOGBACK-GELF - A GELF Appender for Logback
 
 Use this appender to log messages with logback to a Graylog2 server via GELF messages. Supports Additional Fields and chunking.
 
-If you don't know what Graylog2 is, jump on the band wagon! [Graylog2](http://graylog2.org)
+If you don't know what [Graylog2](http://graylog2.org) is, jump on the band wagon!
 
-Add Dependency
+Installation
 -----------------------------------
 
-I recommend using maven to get the artifact, which is now in maven central (as of June 13, 2012). Just add the dependency to your pom.xml.
+Simply add logback-gelf to your classpath. Either
+[download the jar](https://github.com/Moocar/logback-gelf/downloads)
+or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf) land, the dependency details are below.
 
         <dependencies>
             ...
@@ -23,29 +25,9 @@ I recommend using maven to get the artifact, which is now in maven central (as o
 Configuring Logback
 ---------------------
 
-The following assumes you are using groovy for your logback configuration.
+Add the following to your logback.xml configuration file.
 
-    /* src/main/resources/logback.groovy */
-
-    import me.moocar.logbackgelf.GelfAppender
-    import static ch.qos.logback.classic.Level.DEBUG
-
-    appender("GELF", GelfAppender) {
-        facility = "logback-gelf-test"
-        graylog2ServerHost = "localhost"
-        graylog2ServerPort = 12201
-        useLoggerName = true
-	    useThreadName = true
-        graylog2ServerVersion = "0.9.6"
-        chunkThreshold = 1000
-        additionalFields = [ipAddress:"_ip_address", requestId:"_ip_address"]
-    }
-
-    root(DEBUG, ["GELF"])
-
-Or, if you're using logback.xml, here's the equivalent.
-
-    /* src/main/resources/logback.xml */
+    /* [src/main/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml) */
 
     <configuration>
         <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
@@ -56,6 +38,7 @@ Or, if you're using logback.xml, here's the equivalent.
             <useThreadName>true</useThreadName>
             <graylog2ServerVersion>0.9.6</graylog2ServerVersion>
             <chunkThreshold>1000</chunkThreshold>
+            <messagePattern>%m%rEx</messagePattern>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
         </appender>
@@ -64,6 +47,9 @@ Or, if you're using logback.xml, here's the equivalent.
             <appender-ref ref="GELF" />
         </root>
     </configuration>
+
+If you're using groovy configuration, checkout the
+[logback.groovy](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.groovy) example.
 
 Properties
 ----------
@@ -79,15 +65,17 @@ will be the name of the thread. Defaults to false;
 changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.6"
 *   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
 smaller packets. Defaults to 1000
+*   **messagePattern**: The layout of the actual message according to
+[PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout). Defaults to "%m%rEx"
 *   **additionalFields**: See additional fields below. Defaults to empty
 
 Additional Fields
 -----------------
 
 Additional Fields can be added very easily. Let's take an example of adding the ip address of the client to every logged
-message. To do this we add the ip address as a key/value to the slf4j MDC (Mapped Diagnostic Context) so that the
-information persists for the length of the request, and then we inform logback-gelf to look out for this mapping every
-time a message is logged.
+message. To do this we add the ip address as a key/value to the [slf4j MDC](http://logback.qos.ch/manual/mdc.html)
+(Mapped Diagnostic Context) so that the information persists for the length of the request, and then we inform
+logback-gelf to look out for this mapping every time a message is logged.
 
 1.  Store IP address in MDC
 
@@ -98,13 +86,14 @@ time a message is logged.
 
 2.  Inform logback-gelf of MDC mapping
 
-        /* src/main/resources/logback.groovy */
+        /* [src/main/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml) */
         ...
-        appender("GELF", GelfAppender) {
+        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
             ...
-            additionalFields = [ipAddress:"_ip_address"]
+            <additionalField>ipAddress:_ip_address</additionalField>
             ...
-        }
+        </appender>
+        ...
 
 The syntax for the additionalFields in logback.groovy is the following
 
@@ -115,6 +104,8 @@ where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It s
 Examples
 --------
 
-Check out src/test/java/me/moocar/logbackgelf/IntegrationTest.java. Just modify the src/test/resources/logback.groovy or
-logback.xml to point to your graylog2 server, and run the test. You should see the messages appearing in your graylog2
+Check out the
+[integration test](https://github.com/Moocar/logback-gelf/blob/master/src/test/java/me/moocar/logbackgelf/IntegrationTest.java). Just modify
+[src/test/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml)
+to point to your graylog2 server, and run the test. You should see the messages appearing in your graylog2
 web interface.

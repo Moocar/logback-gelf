@@ -23,7 +23,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private boolean useThreadName = false;
     private String graylog2ServerVersion = "0.9.5";
     private int chunkThreshold = 1000;
-    private String messagePattern = "ex";
+    private String messagePattern = "%m%rEx";
     private Map<String, String> additionalFields = new HashMap<String, String>();
 
     // The following are hidden (not configurable)
