@@ -4,8 +4,12 @@ import ch.qos.logback.core.AppenderBase;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,12 +108,15 @@ public class GelfAppender<E> extends AppenderBase<E> {
     /**
      * Retrieves the localhost's hostname, or if unavailable, the ip address
      */
-    private String getLocalHostName() throws UnknownHostException {
-        InetAddress localhost = InetAddress.getLocalHost();
+    private String getLocalHostName() throws SocketException, UnknownHostException {
         try {
-            return localhost.getHostName();
-        } catch (Exception e) {
-            return localhost.getHostAddress();
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
+            if (networkInterface == null) throw e;
+            InetAddress ipAddress = networkInterface.getInetAddresses().nextElement();
+            if (ipAddress == null) throw e;
+            return ipAddress.getHostAddress();
         }
     }
 
