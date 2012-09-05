@@ -105,7 +105,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
      * Retrieves the localhost's hostname, or if unavailable, the ip address
      */
     private String getLocalHostName() throws UnknownHostException {
-	InetAddress localhost = InetAddress.getLocalHost();
+        InetAddress localhost = InetAddress.getLocalHost();
         try {
             return localhost.getHostName();
         } catch (Exception e) {
