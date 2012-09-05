@@ -85,7 +85,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
                 padSeq = false;
             }
 
-            String hostname = InetAddress.getLocalHost().getHostName();
+            String hostname = getLocalHostName();
 
             PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, maxChunks,
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
@@ -98,6 +98,18 @@ public class GelfAppender<E> extends AppenderBase<E> {
         } catch (Exception e) {
 
             throw new RuntimeException("Error initialising appender appenderExecutor", e);
+        }
+    }
+
+    /**
+     * Retrieves the localhost's hostname, or if unavailable, the ip address
+     */
+    private String getLocalHostName() throws UnknownHostException {
+	InetAddress localhost = InetAddress.getLocalHost();
+        try {
+            return localhost.getHostName();
+        } catch (Exception e) {
+            return localhost.getHostAddress();
         }
     }
 
