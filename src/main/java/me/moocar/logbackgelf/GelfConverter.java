@@ -1,20 +1,21 @@
 package me.moocar.logbackgelf;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
+
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Responsible for formatting a log event into a GELF message
  */
-public class GelfConverter<E> {
+public class GelfConverter {
 
     private final String facility;
     private final boolean useLoggerName;
@@ -56,7 +57,7 @@ public class GelfConverter<E> {
      * @param logEvent The log event we're converting
      * @return The log event converted into GELF JSON
      */
-    public String toGelf(E logEvent) {
+    public String toGelf(ILoggingEvent logEvent) {
         try {
             return gson.toJson(mapFields(logEvent));
         } catch (RuntimeException e) {
@@ -70,30 +71,28 @@ public class GelfConverter<E> {
      * @param logEvent The log event
      * @return map of gelf properties
      */
-    private Map<String, Object> mapFields(E logEvent) {
+    private Map<String, Object> mapFields(ILoggingEvent logEvent) {
         Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("facility", facility);
 
         map.put("host", hostname);
 
-        ILoggingEvent eventObject = (ILoggingEvent) logEvent;
-
-        String message = patternLayout.doLayout(eventObject);
+        String message = patternLayout.doLayout(logEvent);
 
         map.put("full_message", message);
         map.put("short_message", truncateToShortMessage(message));
 
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
-        double logEventTimeTimeStamp = eventObject.getTimeStamp() / 1000.0;
+        double logEventTimeTimeStamp = logEvent.getTimeStamp() / 1000.0;
 
         map.put("timestamp", logEventTimeTimeStamp);
 
         map.put("version", "1.0");
 
-        map.put("level", LevelToSyslogSeverity.convert(eventObject));
+        map.put("level", LevelToSyslogSeverity.convert(logEvent));
 
-        additionalFields(map, eventObject);
+        additionalFields(map, logEvent);
 
         return map;
     }

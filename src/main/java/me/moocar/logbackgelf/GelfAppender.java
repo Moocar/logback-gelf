@@ -1,23 +1,24 @@
 package me.moocar.logbackgelf;
 
-import ch.qos.logback.core.AppenderBase;
-
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
  * Layout since the GELF format is static.
  */
-public class GelfAppender<E> extends AppenderBase<E> {
+public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
     // The following are configurable via logback configuration
     private String facility = "GELF";
@@ -37,7 +38,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private boolean padSeq = true;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
 
-    private AppenderExecutor<E> appenderExecutor;
+    private AppenderExecutor appenderExecutor;
 
     /**
      * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
@@ -46,7 +47,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
      * @param logEvent The event that we are logging
      */
     @Override
-    protected void append(E logEvent) {
+    protected void append(ILoggingEvent logEvent) {
 
         try {
 
@@ -97,7 +98,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern);
 
-            appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
+            appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
         } catch (Exception e) {
 
