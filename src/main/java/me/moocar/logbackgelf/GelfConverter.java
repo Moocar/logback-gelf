@@ -2,6 +2,7 @@ package me.moocar.logbackgelf;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
@@ -25,6 +26,7 @@ public class GelfConverter {
     private final String hostname;
     private final Gson gson;
     private final PatternLayout patternLayout;
+	private boolean includeFullMDC;
 
     public GelfConverter(String facility,
                          boolean useLoggerName,
@@ -32,7 +34,8 @@ public class GelfConverter {
                          Map<String, String> additionalFields,
                          int shortMessageLength,
                          String hostname,
-                         String messagePattern) {
+                         String messagePattern, 
+                         boolean includeFullMDC) {
 
         this.facility = facility;
         this.useLoggerName = useLoggerName;
@@ -40,6 +43,7 @@ public class GelfConverter {
         this.additionalFields = additionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
+		this.includeFullMDC = includeFullMDC;
 
         // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -117,13 +121,22 @@ public class GelfConverter {
 
         if (mdc != null) {
 
-            for (String key : additionalFields.keySet()) {
-                String field = mdc.get(key);
-                if (field != null) {
-                    map.put(additionalFields.get(key), field);
-                }
-            }
-
+			if (includeFullMDC) {
+				for (Entry<String, String> e : mdc.entrySet()) {
+					if (additionalFields.containsKey(e.getKey())) {
+						map.put(additionalFields.get(e.getKey()), e.getValue());
+					} else {
+						map.put("_" + e.getKey(), e.getValue());
+					}
+				}
+			} else {
+				for (String key : additionalFields.keySet()) {
+					String field = mdc.get(key);
+					if (field != null) {
+						map.put(additionalFields.get(key), field);
+					}
+				}
+			}
         }
 
     }

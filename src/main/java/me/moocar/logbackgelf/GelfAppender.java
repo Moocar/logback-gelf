@@ -30,6 +30,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private int chunkThreshold = 1000;
     private String messagePattern = "%m%rEx";
     private Map<String, String> additionalFields = new HashMap<String, String>();
+    private boolean includeFullMDC;
 
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
@@ -96,7 +97,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern);
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern, includeFullMDC);
 
             appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
@@ -210,6 +211,31 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     public void setAdditionalFields(Map<String, String> additionalFields) {
         this.additionalFields = additionalFields;
     }
+
+	/**
+	 * Indicates if all values from the MDC should be included in the gelf
+	 * message or only the once listed as {@link #getAdditionalFields()
+	 * additional fields}.
+	 * <p>
+	 * If <code>true</code>, the gelf message will contain all values available
+	 * in the MDC. Each MDC key will be converted to a gelf custom field by
+	 * adding an underscore prefix. If an entry exists in
+	 * {@link #getAdditionalFields() additional field} it will be used instead.
+	 * </p>
+	 * <p>
+	 * If <code>false</code>, only the fields listed in
+	 * {@link #getAdditionalFields() additional field} will be included in the
+	 * message.
+	 * </p>
+	 * 
+	 * @return the includeFullMDC
+	 */
+	public boolean isIncludeFullMDC() {
+		return includeFullMDC;
+	}
+	public void setIncludeFullMDC(boolean includeFullMDC) {
+		this.includeFullMDC = includeFullMDC;
+	}
 
     /**
      * Add an additional field. This is mainly here for compatibility with logback.xml
