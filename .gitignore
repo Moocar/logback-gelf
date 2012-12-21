@@ -5,3 +5,7 @@ target
 .idea/
 *~
 release.properties
+
+.classpath
+.project
+.settings/
