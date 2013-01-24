@@ -87,6 +87,8 @@ public class GelfConverter<E> {
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
         double logEventTimeTimeStamp = eventObject.getTimeStamp() / 1000.0;
 
+        stackTraceField(map, eventObject);
+
         map.put("timestamp", logEventTimeTimeStamp);
 
         map.put("version", "1.0");
@@ -98,10 +100,20 @@ public class GelfConverter<E> {
         return map;
     }
 
+    private void stackTraceField(Map<String, Object> map, ILoggingEvent eventObject) {
+        StackTraceElement[] stackTrace = eventObject.getCallerData();
+        if (stackTrace.length > 0) {
+            StackTraceElement lastStack = stackTrace[0];
+            StringBuffer sb = new StringBuffer();
+            sb.append(lastStack.getFileName()).append(":").append(lastStack.getLineNumber());
+            map.put("file", sb.toString());
+        }
+    }
+
     /**
      * Converts the additional fields into proper GELF JSON
      *
-     * @param map The map of additional fields
+     * @param map         The map of additional fields
      * @param eventObject The Logging event that we are converting to GELF
      */
     private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
@@ -109,9 +121,9 @@ public class GelfConverter<E> {
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
         }
-        
+
         if (useThreadName) {
-        	map.put("_threadName", eventObject.getThreadName());
+            map.put("_threadName", eventObject.getThreadName());
         }
 
         Map<String, String> mdc = eventObject.getMDCPropertyMap();
