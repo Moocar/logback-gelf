@@ -2,14 +2,14 @@ package me.moocar.logbackgelf;
 
 import ch.qos.logback.core.AppenderBase;
 
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
