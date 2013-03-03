@@ -24,6 +24,7 @@ public class IntegrationTest {
     private String requestID;
     private String host;
     private ImmutableSet<String> fieldsToIgnore = ImmutableSet.of("level", "timestamp");
+    private ImmutableMap<String, String> lastRequest = null;
 
     private static String createLongMessage() {
         Random rand = new Random();
@@ -42,10 +43,6 @@ public class IntegrationTest {
     public void setup() throws SocketException, UnknownHostException {
         server = TestServer.build();
         server.start();
-        ipAddress = "87.345.23.55";
-        MDC.put("ipAddress", ipAddress);
-        requestID = String.valueOf(new Random().nextInt(100000));
-        MDC.put("requestId", requestID);
         host = getLocalHostName();
     }
 
@@ -54,9 +51,21 @@ public class IntegrationTest {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
+        logger.debug("Testing empty MDC");
+        sleep();
+        lastRequest = server.lastRequest();
+        assertMapEquals(makeMap("Testing empty MDC"), removeFields(lastRequest));
+        assertTrue(lastRequest.containsKey("level"));
+        assertTrue(lastRequest.containsKey("timestamp"));
+
+        ipAddress = "87.345.23.55";
+        MDC.put("ipAddress", ipAddress);
+        requestID = String.valueOf(new Random().nextInt(100000));
+        MDC.put("requestId", requestID);
+
         logger.debug("this is a new test");
         sleep();
-        ImmutableMap<String, String> lastRequest = server.lastRequest();
+        lastRequest = server.lastRequest();
         assertMapEquals(makeMap("this is a new test"), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
@@ -81,6 +90,7 @@ public class IntegrationTest {
                             "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_41]\n" +
                             "\tat me.moocar.logbackgelf.In"), ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest), Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
+
         server.shutdown();
         logger.debug("This is a test with a really long ending: " + longMessage);
     }
@@ -105,15 +115,18 @@ public class IntegrationTest {
     }
 
     private ImmutableMap<String, String> makeMap(String fullMessage, String shortMessage) {
-        return ImmutableMap.<String, String>builder()
-                .put("_ip_address", ipAddress)
-                .put("_request_id", requestID)
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
                 .put("host", host)
                 .put("facility", "logback-gelf-test")
                 .put("short_message", shortMessage)
                 .put("full_message", fullMessage)
                 .put("_loggerName", "me.moocar.logbackgelf.IntegrationTest")
-                .put("version", "1.0").build();
+                .put("version", "1.0");
+        if (ipAddress != null)
+            builder.put("_ip_address", ipAddress);
+        if (requestID != null)
+            builder.put("_request_id", requestID);
+        return builder.build();
     }
 
     private ImmutableMap<String, String> removeFields(ImmutableMap<String, String> map) {
