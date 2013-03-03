@@ -70,6 +70,12 @@
             <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
