@@ -108,12 +108,3 @@ corresponding `additionalField` mapping.
 
 If the property `includeFullMDC` is set to false (default value) then only the keys listed as `additionalField` will be 
 added to a gelf message.
-
-Examples
---------
-
-Check out the
-[integration test](https://github.com/Moocar/logback-gelf/blob/master/src/test/java/me/moocar/logbackgelf/IntegrationTest.java). Just modify
-[src/test/resources/logback.xml](https://github.com/Moocar/logback-gelf/blob/master/src/test/resources/logback.xml)
-to point to your graylog2 server, and run the test. You should see the messages appearing in your graylog2
-web interface.
