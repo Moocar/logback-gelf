@@ -11,6 +11,7 @@ appender("GELF", GelfAppender) {
     chunkThreshold = 1000
     messagePattern = "%m%rEx"
     additionalFields = [ipAddress:"_ip_address", requestId:"_request_id", contextName:"_context_name"]
+    includeFullMDC = true
 }
 
 root(DEBUG, ["GELF"])
