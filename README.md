@@ -41,6 +41,7 @@ Add the following to your logback.xml configuration file.
             <messagePattern>%m%rEx</messagePattern>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
+            <includeFullMDC>true</includeFullMDC>
         </appender>
 
         <root level="debug">
