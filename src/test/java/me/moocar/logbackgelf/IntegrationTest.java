@@ -35,8 +35,7 @@ public class IntegrationTest {
     private String ipAddress;
     private String requestID;
     private String host;
-    private ImmutableSet<String> jsonKeys = ImmutableSet.of("host", "_ip_address", "_request_id", "facility", "full_message", "short_message",
-            "_loggerName", "version");
+    private ImmutableSet<String> fieldsToIgnore = ImmutableSet.of("level", "timestamp");
 
     private static String createLongMessage() {
         Random rand = new Random();
@@ -130,7 +129,7 @@ public class IntegrationTest {
     }
 
     private ImmutableMap<String, String> removeFields(ImmutableMap<String, String> map) {
-        return ImmutableMap.copyOf(Maps.filterKeys(map,Predicates.in(jsonKeys)));
+        return ImmutableMap.copyOf(Maps.filterKeys(map,Predicates.not(Predicates.in(fieldsToIgnore))));
     }
 
     private void sleep() {
