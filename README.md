@@ -68,6 +68,7 @@ smaller packets. Defaults to 1000
 *   **messagePattern**: The layout of the actual message according to
 [PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to "%m%rEx"
 *   **additionalFields**: See additional fields below. Defaults to empty
+*   **includeFullMDC**: See additional fields below. Defaults to false
 
 Additional Fields
 -----------------
@@ -99,6 +100,13 @@ The syntax for the additionalFields in logback.groovy is the following
     additionalFields = [<MDC Key>:<GELF Additional field name>, ...]
 
 where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It should also begin with an underscore (GELF standard)
+
+If the property `includeFullMDC` is set to true, all fields from the MDC will be added to the gelf message. Any key, which is not
+listed as `additionalField` will be prefixed with an underscore. Otherwise the field name will be obtained from the 
+corresponding `additionalField` mapping.
+
+If the property `includeFullMDC` is set to false (default value) then only the keys listed as `additionalField` will be 
+added to a gelf message.
 
 Examples
 --------

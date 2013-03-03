@@ -1,9 +1,11 @@
 package me.moocar.logbackgelf;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 /**
  * Converts a log event into a a payload or chunks and sends them to the graylog2-server
  */
-public class AppenderExecutor<E> {
+public class AppenderExecutor {
 
     private final Transport transport;
     private final PayloadChunker payloadChunker;
@@ -29,13 +31,12 @@ public class AppenderExecutor<E> {
      *
      * @param logEvent The event that we are logging
      */
-    public void append(E logEvent) {
+	public void append(final ILoggingEvent logEvent) {
 
         byte[] payload = zipper.zip(gelfConverter.toGelf(logEvent));
 
         // If we can fit all the information into one packet, then just send it
         if (payload.length < chunkThreshold) {
-
             transport.send(payload);
 
         // If the message is too long, then slice it up and send multiple packets
@@ -44,6 +45,4 @@ public class AppenderExecutor<E> {
             transport.send(payloadChunker.chunkIt(payload));
         }
     }
-
-
 }

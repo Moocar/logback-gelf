@@ -91,8 +91,22 @@ public class IntegrationTest {
                             "\tat me.moocar.logbackgelf.In"), ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest), Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
 
+        MDC.put("newField", "the val");
+        String shortMessage = "this is a test with an MDC field (new_field) that is not included in the additional fields. " +
+                "However includeFullMDC is set, so it should appear in the additional fields as _newField = the val";
+        logger.debug(shortMessage, "this");
+        sleep();
+        lastRequest = server.lastRequest();
+        assertMapEquals(addField(makeMap(shortMessage), "_newField", "the val"), removeFields(lastRequest));
+        assertTrue(lastRequest.containsKey("level"));
+        assertTrue(lastRequest.containsKey("timestamp"));
+
         server.shutdown();
         logger.debug("This is a test with a really long ending: " + longMessage);
+    }
+
+    private ImmutableMap<String, String> addField(ImmutableMap<String, String> map, String key, String value) {
+        return ImmutableMap.<String, String>builder().putAll(map).put(key, value).build();
     }
 
     private void assertMapEquals (ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {

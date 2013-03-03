@@ -1,7 +1,5 @@
 package me.moocar.logbackgelf;
 
-import ch.qos.logback.core.AppenderBase;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -13,11 +11,14 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
  * Layout since the GELF format is static.
  */
-public class GelfAppender<E> extends AppenderBase<E> {
+public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
     // The following are configurable via logback configuration
     private String facility = "GELF";
@@ -29,6 +30,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private int chunkThreshold = 1000;
     private String messagePattern = "%m%rEx";
     private Map<String, String> additionalFields = new HashMap<String, String>();
+    private boolean includeFullMDC;
 
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
@@ -37,7 +39,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
     private boolean padSeq = true;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
 
-    private AppenderExecutor<E> appenderExecutor;
+    private AppenderExecutor appenderExecutor;
 
     /**
      * The main append method. Takes the event that is being logged, formats if for GELF and then sends it over the wire
@@ -46,7 +48,7 @@ public class GelfAppender<E> extends AppenderBase<E> {
      * @param logEvent The event that we are logging
      */
     @Override
-    protected void append(E logEvent) {
+    protected void append(ILoggingEvent logEvent) {
 
         try {
 
@@ -95,9 +97,9 @@ public class GelfAppender<E> extends AppenderBase<E> {
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern);
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern, includeFullMDC);
 
-            appenderExecutor = new AppenderExecutor<E>(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
+            appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
         } catch (Exception e) {
 
@@ -208,6 +210,31 @@ public class GelfAppender<E> extends AppenderBase<E> {
 
     public void setAdditionalFields(Map<String, String> additionalFields) {
         this.additionalFields = additionalFields;
+    }
+
+    /**
+     * Indicates if all values from the MDC should be included in the gelf
+     * message or only the once listed as {@link #getAdditionalFields()
+     * additional fields}.
+     * <p>
+     * If <code>true</code>, the gelf message will contain all values available
+     * in the MDC. Each MDC key will be converted to a gelf custom field by
+     * adding an underscore prefix. If an entry exists in
+     * {@link #getAdditionalFields() additional field} it will be used instead.
+     * </p>
+     * <p>
+     * If <code>false</code>, only the fields listed in
+     * {@link #getAdditionalFields() additional field} will be included in the
+     * message.
+     * </p>
+     *
+     * @return the includeFullMDC
+     */
+    public boolean isIncludeFullMDC() {
+        return includeFullMDC;
+    }
+    public void setIncludeFullMDC(boolean includeFullMDC) {
+        this.includeFullMDC = includeFullMDC;
     }
 
     /**
