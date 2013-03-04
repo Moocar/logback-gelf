@@ -3,6 +3,8 @@ package me.moocar.logbackgelf;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -101,12 +103,17 @@ public class GelfConverter<E> {
     }
 
     private void stackTraceField(Map<String, Object> map, ILoggingEvent eventObject) {
-        StackTraceElement[] stackTrace = eventObject.getCallerData();
-        if (stackTrace.length > 0) {
-            StackTraceElement lastStack = stackTrace[0];
-            StringBuffer sb = new StringBuffer();
-            sb.append(lastStack.getFileName()).append(":").append(lastStack.getLineNumber());
-            map.put("file", sb.toString());
+        IThrowableProxy throwableProxy = eventObject.getThrowableProxy();
+        if (throwableProxy != null ) {
+            StackTraceElementProxy[] proxyStackTraces = throwableProxy.getStackTraceElementProxyArray();
+            if (proxyStackTraces != null && proxyStackTraces.length > 0) {
+                StackTraceElement[] callStackTraces = eventObject.getCallerData();
+                if (callStackTraces.length > 0) {
+                    StackTraceElement lastStack = callStackTraces[0];
+                    map.put("file", lastStack.getFileName());
+                    map.put("line", lastStack.getLineNumber());
+                }
+            }
         }
     }
 
