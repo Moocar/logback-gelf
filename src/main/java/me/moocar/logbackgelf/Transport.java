@@ -1,10 +1,7 @@
 package me.moocar.logbackgelf;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.List;
 
 /**
@@ -14,6 +11,7 @@ public class Transport {
 
     private final InetAddress graylog2ServerAddress;
     private final int graylog2ServerPort;
+    private final SocketAddress loopbackAddress = new InetSocketAddress("localhost", 0);
 
     public Transport(int graylog2ServerPort, InetAddress graylog2ServerAddress) {
         this.graylog2ServerPort = graylog2ServerPort;
@@ -67,7 +65,7 @@ public class Transport {
 
         try {
 
-            return new DatagramSocket();
+            return new DatagramSocket(loopbackAddress);
 
         } catch (SocketException ex) {
 
