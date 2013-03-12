@@ -285,7 +285,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     "e.g. _node_name:www013");
         }
 
-        additionalFields.put(splitted[0], splitted[1]);
+        staticAdditionalFields.put(splitted[0], splitted[1]);
     }
 
     /**
