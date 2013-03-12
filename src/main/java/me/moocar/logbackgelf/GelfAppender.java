@@ -26,7 +26,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
     private boolean useThreadName = false;
-    private String graylog2ServerVersion = "0.9.5";
+    private String graylog2ServerVersion = "0.9.6";
     private int chunkThreshold = 1000;
     private String messagePattern = "%m%rEx";
     private Map<String, String> additionalFields = new HashMap<String, String>();
@@ -36,8 +36,8 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
     private static final int maxChunks = 127;
-    private int messageIdLength = 32;
-    private boolean padSeq = true;
+    private int messageIdLength = 8;
+    private boolean padSeq = false;
     private final byte[] chunkedGelfId = new byte[]{0x1e, 0x0f};
 
     private AppenderExecutor appenderExecutor;
@@ -87,9 +87,9 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
             Transport transport = new Transport(graylog2ServerPort, address);
 
-            if (graylog2ServerVersion.equals("0.9.6")) {
-                messageIdLength = 8;
-                padSeq = false;
+            if (graylog2ServerVersion.equals("0.9.5")) {
+                messageIdLength = 32;
+                padSeq = true;
             }
 
             String hostname = getLocalHostName();
