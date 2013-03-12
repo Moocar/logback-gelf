@@ -41,6 +41,7 @@ Add the following to your logback.xml configuration file.
             <messagePattern>%m%rEx</messagePattern>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
+            <staticAdditionalField>_node_name:www013</staticAdditionalField>
             <includeFullMDC>true</includeFullMDC>
         </appender>
 
@@ -69,6 +70,7 @@ smaller packets. Defaults to 1000
 *   **messagePattern**: The layout of the actual message according to
 [PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to "%m%rEx"
 *   **additionalFields**: See additional fields below. Defaults to empty
+*   **staticAdditionalFields**: See static additional fields below. Defaults to empty
 *   **includeFullMDC**: See additional fields below. Defaults to false
 
 Additional Fields
@@ -108,3 +110,18 @@ corresponding `additionalField` mapping.
 
 If the property `includeFullMDC` is set to false (default value) then only the keys listed as `additionalField` will be 
 added to a gelf message.
+
+Static Additional Fields
+-----------------
+
+Use static additional fields when you want to add a static key value pair to every GELF message. Key is the additional
+field key (and should thus begin with an underscore). The value is a static string.
+
+E.g in the appender configuration:
+
+        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+            ...
+            <staticAdditionalField>_node_name:www013</staticAdditionalField>
+            ...
+        </appender>
+        ...

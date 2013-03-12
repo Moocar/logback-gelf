@@ -30,6 +30,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private int chunkThreshold = 1000;
     private String messagePattern = "%m%rEx";
     private Map<String, String> additionalFields = new HashMap<String, String>();
+    private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
     private boolean includeFullMDC;
 
     // The following are hidden (not configurable)
@@ -97,7 +98,8 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, shortMessageLength, hostname, messagePattern, includeFullMDC);
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields,
+                    staticAdditionalFields, shortMessageLength, hostname, messagePattern, includeFullMDC);
 
             appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
@@ -213,6 +215,18 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
+     * static additional fields to add to every gelf message. Key is the additional field key (and should thus begin
+     * with an underscore). The value is a static string.
+     */
+    public Map<String, String> getStaticAdditionalFields() {
+        return staticAdditionalFields;
+    }
+
+    public void setStaticAdditionalFields(Map<String, String> staticAdditionalFields) {
+        this.staticAdditionalFields = staticAdditionalFields;
+    }
+
+    /**
      * Indicates if all values from the MDC should be included in the gelf
      * message or only the once listed as {@link #getAdditionalFields()
      * additional fields}.
@@ -241,7 +255,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
      * Add an additional field. This is mainly here for compatibility with logback.xml
      *
      * @param keyValue This must be in format key:value where key is the MDC key, and value is the GELF field
-     * name. e.g "ipAddress:_ip_address"
+     *                 name. e.g "ipAddress:_ip_address"
      */
     public void addAdditionalField(String keyValue) {
         String[] splitted = keyValue.split(":");
@@ -250,6 +264,25 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
             throw new IllegalArgumentException("additionalField must be of the format key:value, where key is the MDC "
                     + "key, and value is the GELF field name. But found '" + keyValue + "' instead.");
+        }
+
+        additionalFields.put(splitted[0], splitted[1]);
+    }
+
+    /**
+     * Add a staticAdditional field. This is mainly here for compatibility with logback.xml
+     *
+     * @param keyValue This must be in format key:value where key is the additional field key, and value is a static
+     *                 string. e.g "_node_name:www013"
+     */
+    public void addStaticAdditionalField(String keyValue) {
+        String[] splitted = keyValue.split(":");
+
+        if (splitted.length != 2) {
+
+            throw new IllegalArgumentException("staticAdditionalField must be of the format key:value, where key is the "
+                    + "additional field key (therefore should have a leading underscore), and value is a static string. " +
+                    "e.g. _node_name:www013");
         }
 
         additionalFields.put(splitted[0], splitted[1]);

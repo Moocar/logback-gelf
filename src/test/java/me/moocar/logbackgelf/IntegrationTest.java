@@ -1,9 +1,13 @@
 package me.moocar.logbackgelf;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -47,15 +51,16 @@ public class IntegrationTest {
     }
 
     @Test
-    public void test() throws IOException {
+    public void test() throws IOException, JoranException {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
+        String message = "Testing empty MDC";
 
         // Basic Request
-        logger.debug("Testing empty MDC");
+        logger.debug(message);
         sleep();
         lastRequest = server.lastRequest();
-        assertMapEquals(makeMap("Testing empty MDC"), removeFields(lastRequest));
+        assertMapEquals(makeMap(message), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
@@ -65,10 +70,11 @@ public class IntegrationTest {
         requestID = String.valueOf(new Random().nextInt(100000));
         MDC.put("requestId", requestID);
 
-        logger.debug("this is a new test");
+        message = "this is a new test";
+        logger.debug(message);
         sleep();
         lastRequest = server.lastRequest();
-        assertMapEquals(makeMap("this is a new test"), removeFields(lastRequest));
+        assertMapEquals(makeMap(message), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
@@ -94,25 +100,45 @@ public class IntegrationTest {
                             "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_41]\n" +
                             "\tat me.moocar.logbackgelf.In"),
                     "file", "IntegrationTest.java"),
-                    "line", "83"),
+                    "line", "93"),
                     ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest),
                             Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
 
         // Test field in MDC is added even if not included in additional fields
         MDC.put("newField", "the val");
-        String shortMessage = "this is a test with an MDC field (new_field) that is not included in the additional fields. " +
+        message = "this is a test with an MDC field (new_field) that is not included in the additional fields. " +
                 "However includeFullMDC is set, so it should appear in the additional fields as _newField = the val";
-        logger.debug(shortMessage, "this");
+        logger.debug(message, "this");
         sleep();
         lastRequest = server.lastRequest();
-        assertMapEquals(addField(makeMap(shortMessage), "_newField", "the val"), removeFields(lastRequest));
+        assertMapEquals(addField(makeMap(message), "_newField", "the val"), removeFields(lastRequest));
+        assertTrue(lastRequest.containsKey("level"));
+        assertTrue(lastRequest.containsKey("timestamp"));
+
+        // Test static additional field
+        message = "Testing with a static additional field";
+        MDC.clear();
+        ipAddress = null;
+        requestID = null;
+        addStaticFieldToAppender();
+        logger.debug(message);
+        sleep();
+        lastRequest = server.lastRequest();
+        assertMapEquals(addField(makeMap(message), "_node_name", "www013"), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
         // Finish
         server.shutdown();
         logger.debug("This is a test with a really long ending: " + longMessage);
+    }
+
+    private void addStaticFieldToAppender() throws JoranException {
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        JoranConfigurator joranConfigurator = new JoranConfigurator();
+        joranConfigurator.setContext(lc);
+        joranConfigurator.doConfigure(Resources.getResource("staticAdditionalFields.xml"));
     }
 
     private ImmutableMap<String, String> addField(ImmutableMap<String, String> map, String key, String value) {

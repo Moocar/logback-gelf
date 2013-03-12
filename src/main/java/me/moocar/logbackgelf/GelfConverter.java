@@ -3,6 +3,7 @@ package me.moocar.logbackgelf;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
@@ -24,6 +25,7 @@ public class GelfConverter {
     private final boolean useLoggerName;
     private final boolean useThreadName;
     private final Map<String, String> additionalFields;
+    private final Map<String, String> staticAdditionalFields;
     private final int shortMessageLength;
     private final String hostname;
     private final Gson gson;
@@ -34,6 +36,7 @@ public class GelfConverter {
                          boolean useLoggerName,
                          boolean useThreadName,
                          Map<String, String> additionalFields,
+                         Map<String, String> staticAdditionalFields,
                          int shortMessageLength,
                          String hostname,
                          String messagePattern,
@@ -43,6 +46,7 @@ public class GelfConverter {
         this.useLoggerName = useLoggerName;
         this.useThreadName = useThreadName;
         this.additionalFields = additionalFields;
+        this.staticAdditionalFields = staticAdditionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
         this.includeFullMDC = includeFullMDC;
@@ -102,6 +106,8 @@ public class GelfConverter {
 
         additionalFields(map, logEvent);
 
+        staticAdditionalFields(map);
+
         return map;
     }
 
@@ -157,7 +163,13 @@ public class GelfConverter {
                 }
             }
         }
+    }
 
+    private void staticAdditionalFields(Map<String,Object> map) {
+
+        for (String key : staticAdditionalFields.keySet()) {
+            map.put(key, (staticAdditionalFields.get(key)));
+        }
     }
 
     private String truncateToShortMessage(String fullMessage) {
