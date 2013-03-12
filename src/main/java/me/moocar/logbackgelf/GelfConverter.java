@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 
 import com.google.gson.FieldNamingPolicy;
@@ -90,6 +92,8 @@ public class GelfConverter {
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
         double logEventTimeTimeStamp = logEvent.getTimeStamp() / 1000.0;
 
+        stackTraceField(map, eventObject);
+
         map.put("timestamp", logEventTimeTimeStamp);
 
         map.put("version", "1.0");
@@ -101,10 +105,25 @@ public class GelfConverter {
         return map;
     }
 
+    private void stackTraceField(Map<String, Object> map, ILoggingEvent eventObject) {
+        IThrowableProxy throwableProxy = eventObject.getThrowableProxy();
+        if (throwableProxy != null ) {
+            StackTraceElementProxy[] proxyStackTraces = throwableProxy.getStackTraceElementProxyArray();
+            if (proxyStackTraces != null && proxyStackTraces.length > 0) {
+                StackTraceElement[] callStackTraces = eventObject.getCallerData();
+                if (callStackTraces.length > 0) {
+                    StackTraceElement lastStack = callStackTraces[0];
+                    map.put("file", lastStack.getFileName());
+                    map.put("line", lastStack.getLineNumber());
+                }
+            }
+        }
+    }
+
     /**
      * Converts the additional fields into proper GELF JSON
      *
-     * @param map The map of additional fields
+     * @param map         The map of additional fields
      * @param eventObject The Logging event that we are converting to GELF
      */
     private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
@@ -112,9 +131,9 @@ public class GelfConverter {
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
         }
-        
+
         if (useThreadName) {
-        	map.put("_threadName", eventObject.getThreadName());
+            map.put("_threadName", eventObject.getThreadName());
         }
 
         Map<String, String> mdc = eventObject.getMDCPropertyMap();
