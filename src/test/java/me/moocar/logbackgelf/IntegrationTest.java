@@ -51,6 +51,7 @@ public class IntegrationTest {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
+        // Basic Request
         logger.debug("Testing empty MDC");
         sleep();
         lastRequest = server.lastRequest();
@@ -58,6 +59,7 @@ public class IntegrationTest {
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
+        // Test with IP and requestID in MDC
         ipAddress = "87.345.23.55";
         MDC.put("ipAddress", ipAddress);
         requestID = String.valueOf(new Random().nextInt(100000));
@@ -70,6 +72,7 @@ public class IntegrationTest {
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
+        // Test substitution works
         logger.debug("this is a test with ({}) parameter", "this");
         sleep();
         lastRequest = server.lastRequest();
@@ -77,6 +80,7 @@ public class IntegrationTest {
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
+        // Test file and line are output for stack trace
         try {
             new URL("app://asdfs");
         } catch (Exception e) {
@@ -95,6 +99,7 @@ public class IntegrationTest {
                             Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
 
+        // Test field in MDC is added even if not included in additional fields
         MDC.put("newField", "the val");
         String shortMessage = "this is a test with an MDC field (new_field) that is not included in the additional fields. " +
                 "However includeFullMDC is set, so it should appear in the additional fields as _newField = the val";
@@ -105,6 +110,7 @@ public class IntegrationTest {
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
+        // Finish
         server.shutdown();
         logger.debug("This is a test with a really long ending: " + longMessage);
     }
