@@ -92,7 +92,7 @@ public class GelfConverter {
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
         double logEventTimeTimeStamp = logEvent.getTimeStamp() / 1000.0;
 
-        stackTraceField(map, eventObject);
+        stackTraceField(map, logEvent);
 
         map.put("timestamp", logEventTimeTimeStamp);
 
@@ -114,7 +114,7 @@ public class GelfConverter {
                 if (callStackTraces.length > 0) {
                     StackTraceElement lastStack = callStackTraces[0];
                     map.put("file", lastStack.getFileName());
-                    map.put("line", lastStack.getLineNumber());
+                    map.put("line", String.valueOf(lastStack.getLineNumber()));
                 }
             }
         }

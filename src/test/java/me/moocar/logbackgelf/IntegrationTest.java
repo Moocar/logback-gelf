@@ -83,12 +83,16 @@ public class IntegrationTest {
             logger.error("expected error", new IllegalStateException(e));
             sleep();
             lastRequest = server.lastRequest();
-            assertMapEquals(makeErrorMap(
+            assertMapEquals(addField(addField(makeErrorMap(
                     "expected errorjava.net.MalformedURLException: unknown protocol: app\n" +
                             "\tat java.net.URL.<init>(URL.java:574) ~[na:1.6.0_41]\n" +
                             "\tat java.net.URL.<init>(URL.java:464) ~[na:1.6.0_41]\n" +
                             "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_41]\n" +
-                            "\tat me.moocar.logbackgelf.In"), ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest), Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
+                            "\tat me.moocar.logbackgelf.In"),
+                    "file", "IntegrationTest.java"),
+                    "line", "83"),
+                    ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest),
+                            Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
 
         MDC.put("newField", "the val");
