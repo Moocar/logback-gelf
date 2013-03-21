@@ -69,6 +69,9 @@ changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.
 smaller packets. Defaults to 1000
 *   **messagePattern**: The layout of the actual message according to
 [PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to "%m%rEx"
+*   **shortMessagePattern**: The layout of the short message according to
+[PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to none which means the message will
+be truncated to create the short message
 *   **additionalFields**: See additional fields below. Defaults to empty
 *   **staticAdditionalFields**: See static additional fields below. Defaults to empty
 *   **includeFullMDC**: See additional fields below. Defaults to false

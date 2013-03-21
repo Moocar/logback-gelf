@@ -30,6 +30,7 @@ public class GelfConverter {
     private final String hostname;
     private final Gson gson;
     private final PatternLayout patternLayout;
+    private final PatternLayout shortPatternLayout;
     private boolean includeFullMDC;
 
     public GelfConverter(String facility,
@@ -40,6 +41,7 @@ public class GelfConverter {
                          int shortMessageLength,
                          String hostname,
                          String messagePattern,
+                         String shortMessagePattern,
                          boolean includeFullMDC) {
 
         this.facility = facility;
@@ -59,6 +61,15 @@ public class GelfConverter {
         this.patternLayout.setContext(new LoggerContext());
         this.patternLayout.setPattern(messagePattern);
         this.patternLayout.start();
+        
+        if ( shortMessagePattern == null ) {
+            this.shortPatternLayout = null;
+        } else {
+            this.shortPatternLayout = new PatternLayout();
+            this.shortPatternLayout.setContext(new LoggerContext());
+            this.shortPatternLayout.setPattern(shortMessagePattern);
+            this.shortPatternLayout.start();
+        }
     }
 
     /**
@@ -91,7 +102,7 @@ public class GelfConverter {
         String message = patternLayout.doLayout(logEvent);
 
         map.put("full_message", message);
-        map.put("short_message", truncateToShortMessage(message));
+        map.put("short_message", truncateToShortMessage(message, logEvent));
 
         // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
         double logEventTimeTimeStamp = logEvent.getTimeStamp() / 1000.0;
@@ -172,7 +183,11 @@ public class GelfConverter {
         }
     }
 
-    private String truncateToShortMessage(String fullMessage) {
+    private String truncateToShortMessage(String fullMessage, ILoggingEvent logEvent) {
+        if ( shortPatternLayout != null ) {
+            return shortPatternLayout.doLayout(logEvent);
+        }
+        
         if (fullMessage.length() > shortMessageLength) {
             return fullMessage.substring(0, shortMessageLength);
         }

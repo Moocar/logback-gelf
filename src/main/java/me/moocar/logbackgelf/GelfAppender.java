@@ -29,6 +29,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private String graylog2ServerVersion = "0.9.6";
     private int chunkThreshold = 1000;
     private String messagePattern = "%m%rEx";
+    private String shortMessagePattern = null;
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
     private boolean includeFullMDC;
@@ -99,7 +100,8 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     new ChunkFactory(chunkedGelfId, padSeq));
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields,
-                    staticAdditionalFields, shortMessageLength, hostname, messagePattern, includeFullMDC);
+                    staticAdditionalFields, shortMessageLength, hostname, messagePattern, shortMessagePattern,
+                    includeFullMDC);
 
             appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
@@ -321,5 +323,13 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
     public void setMessagePattern(String messagePattern) {
         this.messagePattern = messagePattern;
+    }
+
+    public String getShortMessagePattern() {
+        return shortMessagePattern;
+    }
+
+    public void setShortMessagePattern(String shortMessagePattern) {
+        this.shortMessagePattern = shortMessagePattern;
     }
 }
