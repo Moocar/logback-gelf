@@ -95,9 +95,9 @@ public class IntegrationTest {
             lastRequest = server.lastRequest();
             assertMapEquals(addField(addField(makeErrorMap(
                     "expected errorjava.net.MalformedURLException: unknown protocol: app\n" +
-                            "\tat java.net.URL.<init>(URL.java:574) ~[na:1.6.0_41]\n" +
-                            "\tat java.net.URL.<init>(URL.java:464) ~[na:1.6.0_41]\n" +
-                            "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_41]\n" +
+                            "\tat java.net.URL.<init>(URL.java:574) ~[na:1.6.0_43]\n" +
+                            "\tat java.net.URL.<init>(URL.java:464) ~[na:1.6.0_43]\n" +
+                            "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_43]\n" +
                             "\tat me.moocar.logbackgelf.In"),
                     "file", "IntegrationTest.java"),
                     "line", "93"),
@@ -125,7 +125,7 @@ public class IntegrationTest {
         logger.debug(message);
         sleep();
         lastRequest = server.lastRequest();
-        assertMapEquals(addField(makeMap(message), "_node_name", "www013"), removeFields(lastRequest));
+        assertMapEquals(addField(makeMap(message, "Testing wi"), "_node_name", "www013"), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
@@ -146,6 +146,8 @@ public class IntegrationTest {
     }
 
     private void assertMapEquals (ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {
+        //System.out.println(m1);
+        //System.out.println(m2);
         assertTrue("Difference:" + Maps.difference(m1, m2).entriesDiffering(), Maps.difference(m1, m2).areEqual());
     }
 

@@ -39,6 +39,7 @@ Add the following to your logback.xml configuration file.
             <graylog2ServerVersion>0.9.6</graylog2ServerVersion>
             <chunkThreshold>1000</chunkThreshold>
             <messagePattern>%m%rEx</messagePattern>
+            <shortMessagePattern>%.-100(%m%rEx)</shortMessagePattern>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
             <staticAdditionalField>_node_name:www013</staticAdditionalField>
