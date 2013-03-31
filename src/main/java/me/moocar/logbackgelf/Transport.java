@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Locale;
 import java.util.List;
 
 /**
@@ -16,7 +17,8 @@ public class Transport {
 
     private final InetAddress graylog2ServerAddress;
     private final int graylog2ServerPort;
-    private final SocketAddress loopbackAddress = new InetSocketAddress("localhost", 0);
+    private final SocketAddress loopbackAddress = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).indexOf("windows") > -1 ?
+        new InetSocketAddress("localhost", 0) : new InetSocketAddress(0);
 
     public Transport(int graylog2ServerPort, InetAddress graylog2ServerAddress) {
         this.graylog2ServerPort = graylog2ServerPort;
