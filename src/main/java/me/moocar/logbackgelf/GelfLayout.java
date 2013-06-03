@@ -3,23 +3,98 @@ package me.moocar.logbackgelf;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.LayoutBase;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import static me.moocar.logbackgelf.util.InternetUtils.getLocalHostName;
+
 public class GelfLayout extends LayoutBase<ILoggingEvent> {
+    // The following are configurable via logback configuration
+    private String facility = "GELF";
+    private boolean useLoggerName = false;
+    private boolean useThreadName = false;
+    private String messagePattern = "%m%rEx";
+    private String shortMessagePattern = null;
+    private Map<String, String> additionalFields = new HashMap<String, String>();
+    private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
+    private boolean includeFullMDC;
+
+    // The following are hidden (not configurable)
+    private int shortMessageLength = 255;
+
+
     private GelfConverter converter;
 
+    public String getFacility() {
+        return facility;
+    }
 
-    public GelfLayout(String facility,
-                      boolean useLoggerName,
-                      boolean useThreadName,
-                      Map<String, String> additionalFields,
-                      Map<String, String> staticAdditionalFields,
-                      int shortMessageLength,
-                      String hostname,
-                      String messagePattern,
-                      String shortMessagePattern,
-                      boolean includeFullMDC) {
-        this.converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, staticAdditionalFields, shortMessageLength, hostname, messagePattern, shortMessagePattern, includeFullMDC);
+    public void setFacility(String facility) {
+        this.facility = facility;
+    }
+
+    public boolean isUseLoggerName() {
+        return useLoggerName;
+    }
+
+    public void setUseLoggerName(boolean useLoggerName) {
+        this.useLoggerName = useLoggerName;
+    }
+
+    public boolean isUseThreadName() {
+        return useThreadName;
+    }
+
+    public void setUseThreadName(boolean useThreadName) {
+        this.useThreadName = useThreadName;
+    }
+
+    public Map<String, String> getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public void setAdditionalFields(Map<String, String> additionalFields) {
+        this.additionalFields = additionalFields;
+    }
+
+    public Map<String, String> getStaticAdditionalFields() {
+        return staticAdditionalFields;
+    }
+
+    public void setStaticAdditionalFields(Map<String, String> staticAdditionalFields) {
+        this.staticAdditionalFields = staticAdditionalFields;
+    }
+
+    public int getShortMessageLength() {
+        return shortMessageLength;
+    }
+
+    public void setShortMessageLength(int shortMessageLength) {
+        this.shortMessageLength = shortMessageLength;
+    }
+
+    public String getMessagePattern() {
+        return messagePattern;
+    }
+
+    public void setMessagePattern(String messagePattern) {
+        this.messagePattern = messagePattern;
+    }
+
+    public String getShortMessagePattern() {
+        return shortMessagePattern;
+    }
+
+    public void setShortMessagePattern(String shortMessagePattern) {
+        this.shortMessagePattern = shortMessagePattern;
+    }
+
+    public boolean isIncludeFullMDC() {
+        return includeFullMDC;
+    }
+
+    public void setIncludeFullMDC(boolean includeFullMDC) {
+        this.includeFullMDC = includeFullMDC;
     }
 
 
@@ -37,6 +112,22 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
     @Override
     public String doLayout(ILoggingEvent event) {
         return converter.toGelf(event);
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
+        createConverter();
+
+    }
+
+    private void createConverter() {
+        try {
+            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, staticAdditionalFields, shortMessageLength, getLocalHostName(), messagePattern, shortMessagePattern, includeFullMDC);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to initialize converter", e);
+        }
     }
 
     @Override
