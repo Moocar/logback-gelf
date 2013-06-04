@@ -1,18 +1,17 @@
 package me.moocar.logbackgelf;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.AppenderBase;
+import static me.moocar.logbackgelf.util.InternetUtils.*;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
@@ -84,7 +83,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
         try {
 
-            InetAddress address = getInetAddress();
+            InetAddress address = getInetAddress(graylog2ServerHost);
 
             Transport transport = new Transport(graylog2ServerPort, address);
 
@@ -111,34 +110,6 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         }
     }
 
-    /**
-     * Retrieves the localhost's hostname, or if unavailable, the ip address
-     */
-    private String getLocalHostName() throws SocketException, UnknownHostException {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
-            if (networkInterface == null) throw e;
-            InetAddress ipAddress = networkInterface.getInetAddresses().nextElement();
-            if (ipAddress == null) throw e;
-            return ipAddress.getHostAddress();
-        }
-    }
-
-    /**
-     * Gets the Inet address for the graylog2ServerHost and gives a specialised error message if an exception is thrown
-     *
-     * @return The Inet address for graylog2ServerHost
-     */
-    private InetAddress getInetAddress() {
-        try {
-            return InetAddress.getByName(graylog2ServerHost);
-        } catch (UnknownHostException e) {
-            throw new IllegalStateException("Unknown host: " + e.getMessage() +
-                    ". Make sure you have specified the 'graylog2ServerHost' property correctly in your logback.xml'");
-        }
-    }
 
     //////////// Logback Property Getter/Setters ////////////////
 
@@ -186,17 +157,17 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     public void setUseLoggerName(boolean useLoggerName) {
         this.useLoggerName = useLoggerName;
     }
-    
+
     /**
      * If true, an additional field call "_threadName" will be added to each gelf message. Its contents will be the
      * Name of the thread. Defaults to "false".
      */
     public boolean isUseThreadName() {
-    	return useThreadName;
+        return useThreadName;
     }
-    
+
     public void setUseThreadName(boolean useThreadName) {
-    	this.useThreadName = useThreadName;
+        this.useThreadName = useThreadName;
     }
 
     /**
@@ -249,6 +220,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     public boolean isIncludeFullMDC() {
         return includeFullMDC;
     }
+
     public void setIncludeFullMDC(boolean includeFullMDC) {
         this.includeFullMDC = includeFullMDC;
     }
