@@ -1,6 +1,7 @@
 package me.moocar.logbackgelf;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.CoreConstants;
 import ch.qos.logback.core.LayoutBase;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
     private boolean useLoggerName = false;
     private boolean useThreadName = false;
     private boolean useMarker = false;
+    private boolean appendLineSeparator = false;
     private String messagePattern = "%m%rEx";
     private String shortMessagePattern = null;
     private Map<String, String> additionalFields = new HashMap<String, String>();
@@ -25,6 +27,14 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
 
 
     private GelfConverter converter;
+
+    public boolean isAppendLineSeparator() {
+        return appendLineSeparator;
+    }
+
+    public void setAppendLineSeparator(boolean appendLineSeparator) {
+        this.appendLineSeparator = appendLineSeparator;
+    }
 
     public boolean isUseMarker() {
         return useMarker;
@@ -120,7 +130,10 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
      */
     @Override
     public String doLayout(ILoggingEvent event) {
-        return converter.toGelf(event);
+        String eventString = converter.toGelf(event);
+
+        return isAppendLineSeparator() ? eventString + CoreConstants.LINE_SEPARATOR : eventString;
+
     }
 
     @Override
