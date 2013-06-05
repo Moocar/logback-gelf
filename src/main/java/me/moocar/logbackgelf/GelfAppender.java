@@ -24,6 +24,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private String graylog2ServerHost = "localhost";
     private int graylog2ServerPort = 12201;
     private boolean useLoggerName = false;
+    private boolean useMarker = false;
     private boolean useThreadName = false;
     private String graylog2ServerVersion = "0.9.6";
     private int chunkThreshold = 1000;
@@ -98,7 +99,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
-            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields,
+            GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields,
                     staticAdditionalFields, shortMessageLength, hostname, messagePattern, shortMessagePattern,
                     includeFullMDC);
 
@@ -156,6 +157,14 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
     public void setUseLoggerName(boolean useLoggerName) {
         this.useLoggerName = useLoggerName;
+    }
+
+    public boolean isUseMarker() {
+        return useMarker;
+    }
+
+    public void setUseMarker(boolean useMarker) {
+        this.useMarker = useMarker;
     }
 
     /**

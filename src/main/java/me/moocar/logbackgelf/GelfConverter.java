@@ -24,6 +24,7 @@ public class GelfConverter {
     private final String facility;
     private final boolean useLoggerName;
     private final boolean useThreadName;
+    private final boolean useMarker;
     private final Map<String, String> additionalFields;
     private final Map<String, String> staticAdditionalFields;
     private final int shortMessageLength;
@@ -36,6 +37,7 @@ public class GelfConverter {
     public GelfConverter(String facility,
                          boolean useLoggerName,
                          boolean useThreadName,
+                         boolean useMarker,
                          Map<String, String> additionalFields,
                          Map<String, String> staticAdditionalFields,
                          int shortMessageLength,
@@ -46,6 +48,7 @@ public class GelfConverter {
 
         this.facility = facility;
         this.useLoggerName = useLoggerName;
+        this.useMarker = useMarker;
         this.useThreadName = useThreadName;
         this.additionalFields = additionalFields;
         this.staticAdditionalFields = staticAdditionalFields;
@@ -147,6 +150,10 @@ public class GelfConverter {
 
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
+        }
+
+        if(useMarker) {
+            map.put("_marker", eventObject.getMarker().toString());
         }
 
         if (useThreadName) {

@@ -13,6 +13,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
     private String facility = "GELF";
     private boolean useLoggerName = false;
     private boolean useThreadName = false;
+    private boolean useMarker = false;
     private String messagePattern = "%m%rEx";
     private String shortMessagePattern = null;
     private Map<String, String> additionalFields = new HashMap<String, String>();
@@ -24,6 +25,14 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
 
 
     private GelfConverter converter;
+
+    public boolean isUseMarker() {
+        return useMarker;
+    }
+
+    public void setUseMarker(boolean useMarker) {
+        this.useMarker = useMarker;
+    }
 
     public String getFacility() {
         return facility;
@@ -124,7 +133,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
 
     private void createConverter() {
         try {
-            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, additionalFields, staticAdditionalFields, shortMessageLength, getLocalHostName(), messagePattern, shortMessagePattern, includeFullMDC);
+            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields, staticAdditionalFields, shortMessageLength, getLocalHostName(), messagePattern, shortMessagePattern, includeFullMDC);
         } catch (Exception e) {
             throw new RuntimeException("Unable to initialize converter", e);
         }
