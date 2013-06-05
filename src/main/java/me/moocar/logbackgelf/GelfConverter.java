@@ -152,7 +152,7 @@ public class GelfConverter {
             map.put("_loggerName", eventObject.getLoggerName());
         }
 
-        if(useMarker) {
+        if(useMarker && eventHasMarker(eventObject)) {
             map.put("_marker", eventObject.getMarker().toString());
         }
 
@@ -181,6 +181,10 @@ public class GelfConverter {
                 }
             }
         }
+    }
+
+    private boolean eventHasMarker(ILoggingEvent eventObject) {
+        return eventObject.getMarker() != null;
     }
 
     private void staticAdditionalFields(Map<String,Object> map) {

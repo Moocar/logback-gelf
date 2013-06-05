@@ -33,6 +33,17 @@ public class GelfConverterTest {
         testForMarker(true);
     }
 
+    @Test
+    public void testForNoMarkerWhenUseMarkerIsTrueButNoMarkerIsSet() {
+        ILoggingEvent event = createEvent(false);
+        GelfConverter converter = createGelfConverter(true);
+
+        String gelfString = converter.toGelf(event);
+
+        assertThat(gelfString.contains("\"_marker\""), is(equalTo(false)));
+        assertThat(gelfString.contains(markerString), is(equalTo(false)));
+    }
+
     private void testForMarker(boolean useMarker) {
         ILoggingEvent event = createEvent(useMarker);
         GelfConverter converter = createGelfConverter(useMarker);
