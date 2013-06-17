@@ -15,9 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Random;
 
+import static me.moocar.logbackgelf.util.InternetUtils.getLocalHostName;
 import static org.junit.Assert.assertTrue;
 
 public class IntegrationTest {
@@ -33,9 +36,9 @@ public class IntegrationTest {
     private static String createLongMessage() {
         Random rand = new Random();
         StringBuilder str = new StringBuilder();
-        for (int i=0; i< 1000; i++) {
-            char theChar = (char)(rand.nextInt(30) + 65);
-            for (int j=0; j < 80; j++) {
+        for (int i = 0; i < 1000; i++) {
+            char theChar = (char) (rand.nextInt(30) + 65);
+            for (int j = 0; j < 80; j++) {
                 str.append(theChar);
             }
             str.append('\n');
@@ -145,7 +148,7 @@ public class IntegrationTest {
         return ImmutableMap.<String, String>builder().putAll(map).put(key, value).build();
     }
 
-    private void assertMapEquals (ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {
+    private void assertMapEquals(ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {
         //System.out.println(m1);
         //System.out.println(m2);
         assertTrue("Difference:" + Maps.difference(m1, m2).entriesDiffering(), Maps.difference(m1, m2).areEqual());
@@ -182,7 +185,7 @@ public class IntegrationTest {
     }
 
     private ImmutableMap<String, String> removeFields(ImmutableMap<String, String> map) {
-        return ImmutableMap.copyOf(Maps.filterKeys(map,Predicates.not(Predicates.in(fieldsToIgnore))));
+        return ImmutableMap.copyOf(Maps.filterKeys(map, Predicates.not(Predicates.in(fieldsToIgnore))));
     }
 
     private void sleep() {
@@ -192,17 +195,4 @@ public class IntegrationTest {
             e.printStackTrace();
         }
     }
-
-    private String getLocalHostName() throws SocketException, UnknownHostException {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
-            if (networkInterface == null) throw e;
-            InetAddress ipAddress = networkInterface.getInetAddresses().nextElement();
-            if (ipAddress == null) throw e;
-            return ipAddress.getHostAddress();
-        }
-    }
-
 }
