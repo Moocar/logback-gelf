@@ -5,15 +5,15 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * Converts a log event into a a payload or chunks and sends them to the graylog2-server
  */
-public class AppenderExecutor {
+public class UDPAppenderExecutor {
 
-    private final Transport transport;
+    private final UDPTransport transport;
     private final PayloadChunker payloadChunker;
     private final GelfConverter gelfConverter;
     private final Zipper zipper;
     private final int chunkThreshold;
 
-    public AppenderExecutor(Transport transport,
+    public UDPAppenderExecutor(UDPTransport transport,
                             PayloadChunker payloadChunker,
                             GelfConverter gelfConverter,
                             Zipper zipper,
@@ -37,12 +37,12 @@ public class AppenderExecutor {
 
         // If we can fit all the information into one packet, then just send it
         if (payload.length < chunkThreshold) {
-            transport.send(payload);
+            transport.send(payload, logEvent);
 
         // If the message is too long, then slice it up and send multiple packets
         } else {
 
-            transport.send(payloadChunker.chunkIt(payload));
+            transport.send(payloadChunker.chunkIt(payload), logEvent);
         }
     }
 }
