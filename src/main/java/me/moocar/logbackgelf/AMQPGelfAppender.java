@@ -9,7 +9,7 @@ public class AMQPGelfAppender extends BaseAppender {
 
     private String exchangeName;
     private String routingKey;
-    private Integer maxRetries;
+    private int maxRetries = 0;
     private String graylog2AmqpUri;
 
     @Override
@@ -59,11 +59,11 @@ public class AMQPGelfAppender extends BaseAppender {
         this.routingKey = routingKey;
     }
 
-    public Integer getMaxRetries() {
+    public int getMaxRetries() {
         return maxRetries;
     }
 
-    public void setMaxRetries(Integer maxRetries) {
+    public void setMaxRetries(int maxRetries) {
         this.maxRetries = maxRetries;
     }
 

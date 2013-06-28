@@ -20,17 +20,15 @@ public class AMQPTransport implements Transport {
     private Channel channel;
     private String exchangeName;
     private String routingKey;
-    private Integer maxRetries = 5;
+    private int maxRetries;
 
     public AMQPTransport(String graylog2AmqpUri, String exchangeName, String routingKey, Integer maxRetries) throws KeyManagementException, NoSuchAlgorithmException, URISyntaxException {
-        this.exchangeName = exchangeName;
-        this.routingKey = routingKey;
-        if (maxRetries != null) {
-            this.maxRetries = maxRetries;
-        }
-
         factory = new ConnectionFactory();
         factory.setUri(graylog2AmqpUri);
+		
+        this.exchangeName = exchangeName;
+        this.routingKey = routingKey;
+        this.maxRetries = maxRetries;
     }
 
     /**
@@ -43,8 +41,8 @@ public class AMQPTransport implements Transport {
         String uuid = UUID.randomUUID().toString();
         String messageid = "gelf" + new Date().getTime() + uuid;
 
-        int retries = 0;
-        while (retries < maxRetries) {
+        int tries = 0;
+        do {
             try {
                 // establish the connection the first time
                 if (channel == null) {
@@ -65,8 +63,8 @@ public class AMQPTransport implements Transport {
                 return;
             } catch (Exception e) {
                 channel = null;
-                retries++;
+                tries++;
             }
-        }
+        } while (tries <= maxRetries || maxRetries < 0);
     }
 }
