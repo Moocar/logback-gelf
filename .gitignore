@@ -1,4 +1,5 @@
 target
+pom.oclc.xml
 *.iml
 *.ipr
 *.iws.idea
