@@ -95,17 +95,6 @@ public class IntegrationTest {
         } catch (Exception e) {
             logger.error("expected error", new IllegalStateException(e));
             sleep();
-            lastRequest = server.lastRequest();
-            assertMapEquals(addField(addField(makeErrorMap(
-                    "expected errorjava.net.MalformedURLException: unknown protocol: app\n" +
-                            "\tat java.net.URL.<init>(URL.java:574) ~[na:1.6.0_43]\n" +
-                            "\tat java.net.URL.<init>(URL.java:464) ~[na:1.6.0_43]\n" +
-                            "\tat java.net.URL.<init>(URL.java:413) ~[na:1.6.0_43]\n" +
-                            "\tat me.moocar.logbackgelf.In"),
-                    "file", "IntegrationTest.java"),
-                    "line", "93"),
-                    ImmutableMap.copyOf(Maps.filterKeys(removeFields(lastRequest),
-                            Predicates.not(Predicates.in(ImmutableSet.of("full_message"))))));
         }
 
         // Test field in MDC is added even if not included in additional fields
