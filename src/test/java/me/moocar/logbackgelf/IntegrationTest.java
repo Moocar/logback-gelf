@@ -50,7 +50,7 @@ public class IntegrationTest {
     public void setup() throws SocketException, UnknownHostException {
         server = TestServer.build();
         server.start();
-        host = getLocalHostName();
+        host = "Test";
     }
 
     @Test
@@ -66,6 +66,7 @@ public class IntegrationTest {
         assertMapEquals(makeMap(message), removeFields(lastRequest));
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
+        assertTrue(lastRequest.containsKey("host"));
 
         // Test with IP and requestID in MDC
         ipAddress = "87.345.23.55";
