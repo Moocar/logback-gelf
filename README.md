@@ -35,6 +35,7 @@ Add the following to your logback.xml configuration file.
             <graylog2ServerHost>localhost</graylog2ServerHost>
             <graylog2ServerPort>12201</graylog2ServerPort>
             <useLoggerName>true</useLoggerName>
+            <hostName>sendinghost</hostName>
             <useThreadName>true</useThreadName>
             <useMarker>true</useMarker>
             <graylog2ServerVersion>0.9.6</graylog2ServerVersion>
@@ -69,6 +70,7 @@ will be the name of the thread. Defaults to false;
 changed from 0.9.5 -> 0.9.6. Allowed values = 0.9.5 and 0.9.6. Defaults to "0.9.6"
 *   **chunkThreshold**: The maximum number of bytes allowed by the payload before the message should be chunked into
 smaller packets. Defaults to 1000
+*   **hostName** The hostname of the sending host. Defaults to getLocalHostName()
 *   **useMarker**: If true, and the user has used an slf4j marker (http://slf4j.org/api/org/slf4j/Marker.html) in their
 log message by using one of the marker-overloaded log methods (http://slf4j.org/api/org/slf4j/Logger.html), then the
 marker.toString() will be added to the gelf message as the field "_marker".  Defaults to false;

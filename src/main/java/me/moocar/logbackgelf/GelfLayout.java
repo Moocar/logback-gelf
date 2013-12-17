@@ -13,6 +13,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
     // The following are configurable via logback configuration
     private String facility = "GELF";
     private boolean useLoggerName = false;
+    private String hostName;
     private boolean useThreadName = false;
     private boolean useMarker = false;
     private boolean appendLineSeparator = false;
@@ -58,6 +59,16 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
 
     public void setUseLoggerName(boolean useLoggerName) {
         this.useLoggerName = useLoggerName;
+    }
+
+    public String getHostName()
+    {
+        return hostName;
+    }
+
+    public void setHostName(final String hostName)
+    {
+        this.hostName = hostName;
     }
 
     public boolean isUseThreadName() {
@@ -146,7 +157,11 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
 
     private void createConverter() {
         try {
-            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields, staticAdditionalFields, shortMessageLength, getLocalHostName(), messagePattern, shortMessagePattern, includeFullMDC);
+            if (hostName == null) {
+                hostName = getLocalHostName();
+            }
+
+            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields, staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern, includeFullMDC);
         } catch (Exception e) {
             throw new RuntimeException("Unable to initialize converter", e);
         }

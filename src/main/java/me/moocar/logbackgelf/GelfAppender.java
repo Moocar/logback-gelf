@@ -33,6 +33,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
     private boolean includeFullMDC;
+    private String hostName;
 
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
@@ -93,14 +94,16 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                 padSeq = true;
             }
 
-            String hostname = getLocalHostName();
+            if (hostName == null) {
+                hostName = getLocalHostName();
+            }
 
             PayloadChunker payloadChunker = new PayloadChunker(chunkThreshold, maxChunks,
-                    new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostname),
+                    new MessageIdProvider(messageIdLength, MessageDigest.getInstance("MD5"), hostName),
                     new ChunkFactory(chunkedGelfId, padSeq));
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields,
-                    staticAdditionalFields, shortMessageLength, hostname, messagePattern, shortMessagePattern,
+                    staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern,
                     includeFullMDC);
 
             appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
@@ -234,6 +237,18 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         this.includeFullMDC = includeFullMDC;
     }
 
+    /**
+     * Override the local hostname using a config option
+     * @return the local hostname (defaults to getLocalHost() if not overridden
+     * in config
+     */
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
     /**
      * Add an additional field. This is mainly here for compatibility with logback.xml
      *
