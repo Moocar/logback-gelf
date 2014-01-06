@@ -17,8 +17,6 @@ public class Transport {
 
     private final InetAddress graylog2ServerAddress;
     private final int graylog2ServerPort;
-    private final SocketAddress loopbackAddress = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).indexOf("windows") > -1 ?
-        new InetSocketAddress("localhost", 0) : new InetSocketAddress(0);
 
     public Transport(int graylog2ServerPort, InetAddress graylog2ServerAddress) {
         this.graylog2ServerPort = graylog2ServerPort;
@@ -72,7 +70,7 @@ public class Transport {
 
         try {
 
-            return new DatagramSocket(loopbackAddress);
+            return new DatagramSocket();
 
         } catch (SocketException ex) {
 
