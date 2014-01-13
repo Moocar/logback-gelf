@@ -17,7 +17,7 @@ or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf
             <dependency>
                 <groupId>me.moocar</groupId>
                 <artifactId>logback-gelf</artifactId>
-                <version>0.9.6p2</version>
+                <version>0.10p2</version>
             </dependency>
             ...
         </dependencies>
