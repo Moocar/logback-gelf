@@ -141,5 +141,5 @@ Change Log
 
 * Development version 0.11-SNAPSHOT (current Git `master`)
 * Release [0.10p2] on 2014-Jan-12
-  * Added hostName property #28
-  * Reverted Windows timeout #29
+  * Added hostName property [#28](../../issues/28)
+  * Reverted Windows timeout [#29](../../issues/29)
