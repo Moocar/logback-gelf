@@ -20,6 +20,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
     private String messagePattern = "%m%rEx";
     private String shortMessagePattern = null;
     private Map<String, String> additionalFields = new HashMap<String, String>();
+    private Map<String, String> fieldTypes = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
     private boolean includeFullMDC;
 
@@ -161,7 +162,7 @@ public class GelfLayout extends LayoutBase<ILoggingEvent> {
                 hostName = getLocalHostName();
             }
 
-            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields, staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern, includeFullMDC);
+            this.converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields, fieldTypes, staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern, includeFullMDC);
         } catch (Exception e) {
             throw new RuntimeException("Unable to initialize converter", e);
         }

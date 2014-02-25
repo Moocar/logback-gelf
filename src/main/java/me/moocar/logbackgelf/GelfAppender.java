@@ -32,6 +32,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private String shortMessagePattern = null;
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
+    private Map<String, String> fieldTypes = new HashMap<String, String>();
     private boolean includeFullMDC;
     private String hostName;
 
@@ -103,7 +104,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
                     new ChunkFactory(chunkedGelfId, padSeq));
 
             GelfConverter converter = new GelfConverter(facility, useLoggerName, useThreadName, useMarker, additionalFields,
-                    staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern,
+					fieldTypes, staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern,
                     includeFullMDC);
 
             appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
@@ -284,6 +285,30 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
         }
 
         staticAdditionalFields.put(splitted[0], splitted[1]);
+    }
+
+    public void addFieldType(String keyValue) {
+        String[] splitted = keyValue.split(":");
+
+        if (splitted.length != 2 ||
+                !GelfConverter.primitiveTypes.containsKey(splitted[1])) {
+            throw new IllegalArgumentException(
+                    "fieldType must be of the format key:value, where key is the " +
+                            "field key, and value is the type to convert to (one of " +
+                            GelfConverter.primitiveTypes.keySet() +
+                            ")");
+        }
+
+        fieldTypes.put(splitted[0], splitted[1]);
+
+    }
+
+    public Map<String, String> getFieldTypes() {
+        return fieldTypes;
+    }
+
+    public void setFieldTypes(final Map<String, String> fieldTypes) {
+        this.fieldTypes = fieldTypes;
     }
 
     /**

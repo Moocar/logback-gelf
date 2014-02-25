@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 import java.util.Random;
 
 import static me.moocar.logbackgelf.util.InternetUtils.getLocalHostName;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class IntegrationTest {
@@ -30,8 +31,8 @@ public class IntegrationTest {
     private String ipAddress;
     private String requestID;
     private String host;
-    private ImmutableSet<String> fieldsToIgnore = ImmutableSet.of("level", "timestamp");
-    private ImmutableMap<String, String> lastRequest = null;
+    private ImmutableSet<Object> fieldsToIgnore = ImmutableSet.of((Object)"level", (Object)"timestamp");
+    private ImmutableMap<String, Object> lastRequest = null;
 
     private static String createLongMessage() {
         Random rand = new Random();
@@ -57,6 +58,7 @@ public class IntegrationTest {
     public void test() throws IOException, JoranException {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
+        MDC.clear();
         String message = "Testing empty MDC";
 
         // Basic Request
@@ -122,9 +124,35 @@ public class IntegrationTest {
         assertTrue(lastRequest.containsKey("level"));
         assertTrue(lastRequest.containsKey("timestamp"));
 
+        // Test field type conversion
+        addTypedFieldToAppender();
+        int i = new Random().nextInt(100000);
+        MDC.put("requestId", String.valueOf(i));
+        message = "Testing requestId as int field conversion";
+        logger.debug(message);
+        sleep();
+        lastRequest = server.lastRequest();
+        assertTrue(lastRequest.get("_request_id").getClass().getSimpleName(), lastRequest.get("_request_id") instanceof Number);
+        assertEquals(i, ((Number) lastRequest.get("_request_id")).intValue());
+
+        // Test failed type conversion
+        MDC.put("requestId", "nonparseablenumber");
+        message = "Testing failed requestId as int field conversion";
+        logger.debug(message);
+        sleep();
+        lastRequest = server.lastRequest();
+        assertEquals("nonparseablenumber", lastRequest.get("_request_id"));
+
         // Finish
         server.shutdown();
         logger.debug("This is a test with a really long ending: " + longMessage);
+    }
+
+    private void addTypedFieldToAppender() throws JoranException {
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        JoranConfigurator joranConfigurator = new JoranConfigurator();
+        joranConfigurator.setContext(lc);
+        joranConfigurator.doConfigure(Resources.getResource("typedFields.xml"));
     }
 
     private void addStaticFieldToAppender() throws JoranException {
@@ -134,11 +162,12 @@ public class IntegrationTest {
         joranConfigurator.doConfigure(Resources.getResource("staticAdditionalFields.xml"));
     }
 
-    private ImmutableMap<String, String> addField(ImmutableMap<String, String> map, String key, String value) {
-        return ImmutableMap.<String, String>builder().putAll(map).put(key, value).build();
+    private ImmutableMap<String, Object> addField(ImmutableMap<String, Object> map, String key, String value) {
+        return ImmutableMap.<String, Object>builder().putAll(map).put(key,
+                value).build();
     }
 
-    private void assertMapEquals(ImmutableMap<String, String> m1, ImmutableMap<String, String> m2) {
+    private void assertMapEquals(ImmutableMap<String, Object> m1, ImmutableMap<String, Object> m2) {
         //System.out.println(m1);
         //System.out.println(m2);
         assertTrue("Difference:" + Maps.difference(m1, m2).entriesDiffering(), Maps.difference(m1, m2).areEqual());
@@ -155,12 +184,12 @@ public class IntegrationTest {
                 .put("version", "1.0").build();
     }
 
-    private ImmutableMap<String, String> makeMap(String message) {
+    private ImmutableMap<String, Object> makeMap(String message) {
         return makeMap(message, message);
     }
 
-    private ImmutableMap<String, String> makeMap(String fullMessage, String shortMessage) {
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.<String, String>builder()
+    private ImmutableMap<String, Object> makeMap(String fullMessage, String shortMessage) {
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
                 .put("host", host)
                 .put("facility", "logback-gelf-test")
                 .put("short_message", shortMessage)
@@ -174,7 +203,7 @@ public class IntegrationTest {
         return builder.build();
     }
 
-    private ImmutableMap<String, String> removeFields(ImmutableMap<String, String> map) {
+    private ImmutableMap<String, Object> removeFields(ImmutableMap<String, Object> map) {
         return ImmutableMap.copyOf(Maps.filterKeys(map, Predicates.not(Predicates.in(fieldsToIgnore))));
     }
 

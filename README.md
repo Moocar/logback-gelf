@@ -44,6 +44,7 @@ Add the following to your logback.xml configuration file.
             <shortMessagePattern>%.-100(%m%rEx)</shortMessagePattern>
             <additionalField>ipAddress:_ip_address</additionalField>
             <additionalField>requestId:_request_id</additionalField>
+            <fieldType>_request_id:long</fieldType>
             <staticAdditionalField>_node_name:www013</staticAdditionalField>
             <includeFullMDC>true</includeFullMDC>
         </appender>
@@ -80,6 +81,7 @@ marker.toString() will be added to the gelf message as the field "_marker".  Def
 [PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to none which means the message will
 be truncated to create the short message
 *   **additionalFields**: See additional fields below. Defaults to empty
+*   **fieldType**: See field type conversion below. Defaults to empty
 *   **staticAdditionalFields**: See static additional fields below. Defaults to empty
 *   **includeFullMDC**: See additional fields below. Defaults to false
 
@@ -136,10 +138,27 @@ E.g in the appender configuration:
         </appender>
         ...
 
+Field type conversion
+-----------------
+
+You can configure a specific field to be converted to a numeric type. Currently supported types are ``int``, ``long``,
+``float`` and ``double``.
+
+        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+            ...
+            <fieldType>_request_id:long</fieldType>
+            ...
+        </appender>
+        ...
+
+logback-gelf will leave the field value alone (i.e.: send it as String) and print the stacktrace if the conversion fails.
+
+
 Change Log
 --------------------------------------
 
 * Development version 0.11-SNAPSHOT (current Git `master`)
+  * Added field type conversion [#30](../../issues/30)
 * Release [0.10p2] on 2014-Jan-12
   * Added hostName property [#28](../../issues/28)
   * Reverted Windows timeout [#29](../../issues/29)
