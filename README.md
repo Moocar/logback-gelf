@@ -81,7 +81,7 @@ marker.toString() will be added to the gelf message as the field "_marker".  Def
 [PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Defaults to none which means the message will
 be truncated to create the short message
 *   **additionalFields**: See additional fields below. Defaults to empty
-*   **fieldType**: See field type conversion below. Defaults to empty
+*   **fieldType**: See field type conversion below. Defaults to empty (fields sent as string)
 *   **staticAdditionalFields**: See static additional fields below. Defaults to empty
 *   **includeFullMDC**: See additional fields below. Defaults to false
 
@@ -141,8 +141,9 @@ E.g in the appender configuration:
 Field type conversion
 -----------------
 
-You can configure a specific field to be converted to a numeric type. Currently supported types are ``int``, ``long``,
-``float`` and ``double``.
+You can configure a specific field to be converted to a numeric type. Key is the additional field key (and should thus
+begin with an underscore), value is the type to convert to. Currently supported types are ``int``, ``long``, ``float``
+and ``double``.
 
         <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
             ...
