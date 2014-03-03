@@ -54,10 +54,13 @@ public class GelfConverterTest {
             ImmutableMap.<String, String>builder()
                 .put("_intField", "int")
                 .put("_IntegerField", "Integer")
-                .put("_longField", "long").put("_LongField", "Long")
-                .put("_floatField", "float").put("_FloatField", "Float")
+                .put("_longField", "long")
+                .put("_LongField", "Long")
+                .put("_floatField", "float")
+                .put("_FloatField", "Float")
                 .put("_doubleField", "double")
-                .put("_DoubleField", "Double").put("_foo", "foo")
+                .put("_DoubleField", "Double")
+                .put("_foo", "foo")
             .build();
 
         MDC.put("intField", "123");
