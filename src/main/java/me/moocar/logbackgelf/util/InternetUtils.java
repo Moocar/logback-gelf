@@ -23,7 +23,7 @@ public class InternetUtils {
      */
     public static String getLocalHostName() throws SocketException, UnknownHostException {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            return InetAddress.getLocalHost().getCanonicalHostName();
         } catch (UnknownHostException e) {
             NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
             if (networkInterface == null) throw e;
