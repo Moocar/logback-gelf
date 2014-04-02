@@ -1,5 +1,7 @@
 package me.moocar.logbackgelf;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,6 +28,7 @@ public class GelfConverter {
     private final boolean useThreadName;
     private final boolean useMarker;
     private final Map<String, String> additionalFields;
+    private final Map<String, String> fieldTypes;
     private final Map<String, String> staticAdditionalFields;
     private final int shortMessageLength;
     private final String hostname;
@@ -34,11 +37,30 @@ public class GelfConverter {
     private final PatternLayout shortPatternLayout;
     private boolean includeFullMDC;
 
+    static Map<String, Method> primitiveTypes;
+
+    static {
+        primitiveTypes = new HashMap<String, Method>();
+        try {
+            primitiveTypes.put("int", Integer.class.getDeclaredMethod("parseInt", String.class));
+            primitiveTypes.put("Integer", Integer.class.getDeclaredMethod("parseInt", String.class));
+            primitiveTypes.put("long", Long.class.getDeclaredMethod("parseLong", String.class));
+            primitiveTypes.put("Long", Long.class.getDeclaredMethod("parseLong", String.class));
+            primitiveTypes.put("float", Float.class.getDeclaredMethod("parseFloat", String.class));
+            primitiveTypes.put("Float", Float.class.getDeclaredMethod("parseFloat", String.class));
+            primitiveTypes.put("double", Double.class.getDeclaredMethod("parseDouble", String.class));
+            primitiveTypes.put("Double", Double.class.getDeclaredMethod("parseDouble", String.class));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
     public GelfConverter(String facility,
                          boolean useLoggerName,
                          boolean useThreadName,
                          boolean useMarker,
                          Map<String, String> additionalFields,
+                         Map<String, String> fieldTypes,
                          Map<String, String> staticAdditionalFields,
                          int shortMessageLength,
                          String hostname,
@@ -51,6 +73,7 @@ public class GelfConverter {
         this.useMarker = useMarker;
         this.useThreadName = useThreadName;
         this.additionalFields = additionalFields;
+        this.fieldTypes = fieldTypes;
         this.staticAdditionalFields = staticAdditionalFields;
         this.shortMessageLength = shortMessageLength;
         this.hostname = hostname;
@@ -146,7 +169,7 @@ public class GelfConverter {
      * @param map         The map of additional fields
      * @param eventObject The Logging event that we are converting to GELF
      */
-    private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
+    /* allow testing */ void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
 
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
@@ -167,20 +190,32 @@ public class GelfConverter {
             if (includeFullMDC) {
                 for (Entry<String, String> e : mdc.entrySet()) {
                     if (additionalFields.containsKey(e.getKey())) {
-                        map.put(additionalFields.get(e.getKey()), e.getValue());
+                        map.put(additionalFields.get(e.getKey()), convertFieldType(e.getValue(), additionalFields.get(e.getKey())));
                     } else {
-                        map.put("_" + e.getKey(), e.getValue());
+                        map.put("_" + e.getKey(), convertFieldType(e.getValue(), "_" + e.getKey()));
                     }
                 }
             } else {
                 for (String key : additionalFields.keySet()) {
                     String field = mdc.get(key);
                     if (field != null) {
-                        map.put(additionalFields.get(key), field);
+                        map.put(additionalFields.get(key), convertFieldType(field, key));
                     }
                 }
             }
         }
+    }
+
+    private Object convertFieldType(Object value, final String type) {
+        if (primitiveTypes.containsKey(fieldTypes.get(type))) {
+            try {
+                value = primitiveTypes.get(fieldTypes.get(type)).invoke(null,
+                        value);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        }
+        return value;
     }
 
     private boolean eventHasMarker(ILoggingEvent eventObject) {

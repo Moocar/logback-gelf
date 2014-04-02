@@ -35,7 +35,7 @@ public class TestServer {
         return new TestServer(new ServerThread(new DatagramSocket(12201)));
     }
 
-    public ImmutableMap<String, String> lastRequest() {
+    public ImmutableMap<String, Object> lastRequest() {
         return serverThread.lastRequest;
     }
 
@@ -46,7 +46,7 @@ public class TestServer {
     private static class ServerThread extends Thread {
 
         private final DatagramSocket socket;
-        private ImmutableMap<String, String> lastRequest;
+        private ImmutableMap<String, Object> lastRequest;
         private boolean stopServer = false;
         private static final int maxPacketSize = 8192;
         private final Gson gson;
@@ -64,7 +64,7 @@ public class TestServer {
                 try {
                     socket.receive(packet);
                 } catch (IOException e) {
-                    lastRequest = ImmutableMap.of("Error", e.getMessage());
+                    lastRequest = ImmutableMap.of("Error", (Object)e.getMessage());
                 }
                 if (receivedData[0] == (byte) 0x1f && receivedData[1] == (byte) 0x8b) {
                     String decompressed = decompressGzip(packet.getData());
