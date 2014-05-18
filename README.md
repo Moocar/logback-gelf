@@ -160,6 +160,10 @@ Change Log
 
 * Development version 0.11-SNAPSHOT (current Git `master`)
   * Added field type conversion [#30](../../issues/30)
+  * Use FQDN or fallback to hostname [#32](../../issues/32)
+  * Update dependencies [#36](../../issues/36)
+  * Remove copyright notice on InternetUtils [#38](../../issues/38)
+  * Better testing of line and file in exceptions [#34](../../issues/34)
 * Release [0.10p2] on 2014-Jan-12
   * Added hostName property [#28](../../issues/28)
   * Reverted Windows timeout [#29](../../issues/29)
