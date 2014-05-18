@@ -20,7 +20,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-import static me.moocar.logbackgelf.util.InternetUtils.getLocalHostName;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

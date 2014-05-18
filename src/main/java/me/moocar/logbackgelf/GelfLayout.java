@@ -7,7 +7,7 @@ import ch.qos.logback.core.LayoutBase;
 import java.util.HashMap;
 import java.util.Map;
 
-import static me.moocar.logbackgelf.util.InternetUtils.getLocalHostName;
+import static me.moocar.logbackgelf.InternetUtils.getLocalHostName;
 
 public class GelfLayout extends LayoutBase<ILoggingEvent> {
     // The following are configurable via logback configuration
