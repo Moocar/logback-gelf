@@ -21,15 +21,17 @@ public class InternetUtils {
     }
 
     /**
-     * Retrieves the localhost's hostname, or if unavailable, the ip address
+     * Retrieves the local host's hostname. If found, the fully qualified domain name (FQDN) will be returned,
+     * otherwise it will fallback to the unqualified domain name. E.g prefer guerrero.moocar.me over guerrero.
      */
     public static String getLocalHostName() throws SocketException, UnknownHostException {
         try {
             final String canonicalHostName = InetAddress.getLocalHost().getCanonicalHostName();
-            if (canonicalHostName.contains(".") && !canonicalHostName.matches(REGEX_IP_ADDRESS)) {
+            if (isFQDN(canonicalHostName)) {
                 return canonicalHostName;
+            } else {
+                return InetAddress.getLocalHost().getHostName();
             }
-            return InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
             NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
             if (networkInterface == null) throw e;
@@ -37,6 +39,13 @@ public class InternetUtils {
             if (ipAddress == null) throw e;
             return ipAddress.getHostAddress();
         }
+    }
+
+    /**
+     * Returns true is the hostname is a Fully Qualified Domain Name (FQDN)
+     */
+    private static boolean isFQDN(String hostname) {
+        return hostname.contains(".") && !hostname.matches(REGEX_IP_ADDRESS);
     }
 
     /**
