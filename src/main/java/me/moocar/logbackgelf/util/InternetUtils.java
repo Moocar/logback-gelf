@@ -15,6 +15,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class InternetUtils {
+    private static final String REGEX_IP_ADDRESS = "\\d+(\\.\\d+){3}";
+
     private InternetUtils() {
     }
 
@@ -23,6 +25,10 @@ public class InternetUtils {
      */
     public static String getLocalHostName() throws SocketException, UnknownHostException {
         try {
+            final String canonicalHostName = InetAddress.getLocalHost().getCanonicalHostName();
+            if (canonicalHostName.contains(".") && !canonicalHostName.matches(REGEX_IP_ADDRESS)) {
+                return canonicalHostName;
+            }
             return InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
             NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
