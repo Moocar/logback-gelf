@@ -6,13 +6,23 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class InternetUtils {
+    private static final String REGEX_IP_ADDRESS = "\\d+(\\.\\d+){3}";
+
+    private InternetUtils() {
+    }
 
     /**
-     * Retrieves the localhost's hostname, or if unavailable, the ip address
+     * Retrieves the local host's hostname. If found, the fully qualified domain name (FQDN) will be returned,
+     * otherwise it will fallback to the unqualified domain name. E.g prefer guerrero.moocar.me over guerrero.
      */
     public static String getLocalHostName() throws SocketException, UnknownHostException {
         try {
-            return InetAddress.getLocalHost().getHostName();
+            final String canonicalHostName = InetAddress.getLocalHost().getCanonicalHostName();
+            if (isFQDN(canonicalHostName)) {
+                return canonicalHostName;
+            } else {
+                return InetAddress.getLocalHost().getHostName();
+            }
         } catch (UnknownHostException e) {
             NetworkInterface networkInterface = NetworkInterface.getNetworkInterfaces().nextElement();
             if (networkInterface == null)
@@ -22,6 +32,13 @@ public class InternetUtils {
                 throw e;
             return ipAddress.getHostAddress();
         }
+    }
+
+    /**
+     * Returns true is the hostname is a Fully Qualified Domain Name (FQDN)
+     */
+    private static boolean isFQDN(String hostname) {
+        return hostname.contains(".") && !hostname.matches(REGEX_IP_ADDRESS);
     }
 
     /**

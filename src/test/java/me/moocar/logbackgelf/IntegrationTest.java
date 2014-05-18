@@ -95,8 +95,12 @@ public class IntegrationTest {
         try {
             new URL("app://asdfs");
         } catch (Exception e) {
+            int ln = Thread.currentThread().getStackTrace()[1].getLineNumber();
             logger.error("expected error", new IllegalStateException(e));
             sleep();
+            lastRequest = server.lastRequest();
+            assertEquals(ln + 1, Integer.parseInt((String) lastRequest.get("line")));
+            assertEquals(this.getClass().getSimpleName() + ".java", lastRequest.get("file"));
         }
 
         // Test field in MDC is added even if not included in additional fields
