@@ -1,4 +1,4 @@
-package me.moocar.logbackgelf.util;
+package me.moocar.logbackgelf;
 
 import java.net.InetAddress;
 import java.net.SocketException;

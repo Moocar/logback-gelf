@@ -11,7 +11,8 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
-import static me.moocar.logbackgelf.util.InternetUtils.*;
+import static me.moocar.logbackgelf.InternetUtils.getInetAddress;
+import static me.moocar.logbackgelf.InternetUtils.getLocalHostName;
 
 /**
  * Responsible for Formatting a log event and sending it to a Graylog2 Server. Note that you can't swap in a different
