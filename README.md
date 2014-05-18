@@ -17,7 +17,7 @@ or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf
             <dependency>
                 <groupId>me.moocar</groupId>
                 <artifactId>logback-gelf</artifactId>
-                <version>0.10p2</version>
+                <version>0.11</version>
             </dependency>
             ...
         </dependencies>
@@ -158,7 +158,8 @@ logback-gelf will leave the field value alone (i.e.: send it as String) and prin
 Change Log
 --------------------------------------
 
-* Development version 0.11-SNAPSHOT (current Git `master`)
+* Development version 0.12-SNAPSHOT (current Git `master`)
+* Release [0.11] on 2014-May-18
   * Added field type conversion [#30](../../issues/30)
   * Use FQDN or fallback to hostname [#32](../../issues/32)
   * Update dependencies [#36](../../issues/36)
