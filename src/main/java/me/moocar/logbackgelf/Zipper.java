@@ -17,7 +17,7 @@ public class Zipper {
         try {
             ByteArrayOutputStream targetStream = new ByteArrayOutputStream();
             zipStream = new GZIPOutputStream(targetStream);
-            zipStream.write(str.getBytes());
+            zipStream.write(str.getBytes("UTF-8"));
             zipStream.close();
             byte[] zipped = targetStream.toByteArray();
             targetStream.close();
