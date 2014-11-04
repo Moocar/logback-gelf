@@ -160,6 +160,7 @@ Change Log
 
 * Development version 0.13-SNAPSHOT (current Git `master`)
 * Release [0.12] on 2014-Nov-04
+  * Explicitly set Zipper string encoding to UTF-8 [#41](../../issues/41)
 * Release [0.11] on 2014-May-18
   * Added field type conversion [#30](../../issues/30)
   * Use FQDN or fallback to hostname [#32](../../issues/32)
