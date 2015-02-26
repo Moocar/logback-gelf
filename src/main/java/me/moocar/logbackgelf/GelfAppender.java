@@ -36,6 +36,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     private Map<String, String> fieldTypes = new HashMap<String, String>();
     private boolean includeFullMDC;
     private String hostName;
+    private String transport; // UDP or TCP
 
     // The following are hidden (not configurable)
     private int shortMessageLength = 255;
@@ -89,7 +90,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 
             InetAddress address = getInetAddress(graylog2ServerHost);
 
-            Transport transport = new Transport(graylog2ServerPort, address);
+            Transport transport = ("TCP".equalsIgnoreCase(this.transport)) ? new TcpTransport(graylog2ServerPort, address) : new UdpTransport(graylog2ServerPort, address);
 
             if (graylog2ServerVersion.equals("0.9.5")) {
                 messageIdLength = 32;
@@ -354,4 +355,8 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
     public void setShortMessagePattern(String shortMessagePattern) {
         this.shortMessagePattern = shortMessagePattern;
     }
+
+    public void setTransport(String transport) { this.transport = transport; }
+
+    public String getTransport() { return transport; }
 }

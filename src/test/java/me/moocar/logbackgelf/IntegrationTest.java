@@ -46,16 +46,42 @@ public class IntegrationTest {
         return str.toString();
     }
 
-    @Before
-    public void setup() throws SocketException, UnknownHostException {
-        server = TestServer.build();
+    @Test
+    public void testTcp() throws IOException, JoranException {
+        server = TestTcpServer.build();
         server.start();
         host = "Test";
+
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        JoranConfigurator joranConfigurator = new JoranConfigurator();
+        joranConfigurator.setContext(lc);
+        joranConfigurator.doConfigure(Resources.getResource("tcp.xml"));
+
+
+        Logger logger = LoggerFactory.getLogger(this.getClass());
+        MDC.clear();
+        String message = "Testing empty MDC";
+
+        // Basic Request
+        logger.debug(message);
+        sleep();
+        lastRequest = server.lastRequest();
+        assertMapEquals(makeMap(message), removeFields(lastRequest));
+        assertTrue(lastRequest.containsKey("level"));
+        assertTrue(lastRequest.containsKey("timestamp"));
+        assertTrue(lastRequest.containsKey("host"));
+
+        server.shutdown();
     }
 
-    @Test
-    public void test() throws IOException, JoranException {
+    public void testUdp() throws Exception {
+        server = TestUdpServer.build();
+        server.start();
+        host = "Test";
+        test();
+    }
 
+    public void test() throws IOException, JoranException {
         Logger logger = LoggerFactory.getLogger(this.getClass());
         MDC.clear();
         String message = "Testing empty MDC";
