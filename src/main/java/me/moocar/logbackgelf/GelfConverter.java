@@ -154,7 +154,7 @@ public class GelfConverter {
             StackTraceElementProxy[] proxyStackTraces = throwableProxy.getStackTraceElementProxyArray();
             if (proxyStackTraces != null && proxyStackTraces.length > 0) {
                 StackTraceElement[] callStackTraces = eventObject.getCallerData();
-                if (callStackTraces.length > 0) {
+                if (callStackTraces != null && callStackTraces.length > 0) {
                     StackTraceElement lastStack = callStackTraces[0];
                     map.put("file", lastStack.getFileName());
                     map.put("line", String.valueOf(lastStack.getLineNumber()));
