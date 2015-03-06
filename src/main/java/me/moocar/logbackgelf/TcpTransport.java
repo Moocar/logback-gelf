@@ -78,8 +78,10 @@ public class TcpTransport implements Transport {
     }
 
     private void writeNullTerminated(byte[] packet, OutputStream outputStream) throws IOException {
-        outputStream.write(packet);
-        outputStream.write(0);
+        byte[] nullTerminated = new byte [packet.length + 1];
+        System.arraycopy(packet, 0, nullTerminated, 0, packet.length);
+        nullTerminated[packet.length] = 0;
+        outputStream.write(nullTerminated);
     }
 
     interface SocketFunction {
