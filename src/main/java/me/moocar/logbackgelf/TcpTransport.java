@@ -1,19 +1,18 @@
 package me.moocar.logbackgelf;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
 
 public class TcpTransport implements Transport {
     private final InetAddress graylog2ServerAddress;
     private final int graylog2ServerPort;
     private final Lock lock = new ReentrantLock();
     private Socket socket;
-
     public TcpTransport(int graylog2ServerPort, InetAddress graylog2ServerAddress) {
         this.graylog2ServerPort = graylog2ServerPort;
         this.graylog2ServerAddress = graylog2ServerAddress;
@@ -21,18 +20,20 @@ public class TcpTransport implements Transport {
 
 
     @Override
-    public void send(byte[] data) {
-        ensureConnected(s -> {
-            try {
-                s.getOutputStream().write(data);
-            } catch (IOException e) {
-                // Silently fail, same as UDP
+    public void send(final byte[] data) {
+        ensureConnected(new SocketFunction() {
+            @Override
+            public void call(Socket s) {
+                try {
+                    writeNullTerminated(data, s.getOutputStream());
+                } catch (IOException e) {
+                    // Silently fail, same as UDP
+                }
             }
-            return null;
         });
     }
 
-    private void ensureConnected(Function<Socket, Void> function) {
+    private void ensureConnected(SocketFunction function) {
         try {
             lock.lock();
             try {
@@ -50,7 +51,7 @@ public class TcpTransport implements Transport {
             } finally {
                 lock.unlock();
             }
-            function.apply(socket);
+            function.call(socket);
         } catch (IOException e) {
             // Silently fail, same as UDP
         }
@@ -61,16 +62,28 @@ public class TcpTransport implements Transport {
     }
 
     @Override
-    public void send(List<byte[]> packets) {
-        ensureConnected(s -> {
-            try {
-                for (byte[] packet : packets) {
-                    s.getOutputStream().write(packet);
+    public void send(final List<byte[]> packets) {
+        ensureConnected(new SocketFunction() {
+            @Override
+            public void call(Socket s) {
+                try {
+                    for (byte[] packet : packets) {
+                        writeNullTerminated(packet, s.getOutputStream());
+                    }
+                } catch (IOException e) {
+                    // Silently fail, same as UDP
                 }
-            } catch (IOException e) {
-                // Silently fail, same as UDP
             }
-            return null;
         });
     }
+
+    private void writeNullTerminated(byte[] packet, OutputStream outputStream) throws IOException {
+        outputStream.write(packet);
+        outputStream.write(0);
+    }
+
+    interface SocketFunction {
+        public void call(Socket socket);
+    }
 }
+

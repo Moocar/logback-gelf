@@ -74,6 +74,7 @@ public class IntegrationTest {
         server.shutdown();
     }
 
+    @Test
     public void testUdp() throws Exception {
         server = TestUdpServer.build();
         server.start();

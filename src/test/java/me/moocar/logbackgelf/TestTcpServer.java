@@ -6,11 +6,13 @@ import com.google.gson.Gson;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -56,18 +58,23 @@ public class TestTcpServer implements TestServer {
             while (!stopServer) {
                 try {
                     Socket accept = socket.accept();
-                    byte[] receivedData = new byte[maxPacketSize];
-                    try {
-                        accept.getInputStream().read(receivedData);
-                    } catch (IOException e) {
-                        lastRequest = ImmutableMap.of("Error", (Object)e.getMessage());
-                    }
-                    if (receivedData[0] == (byte) 0x1f && receivedData[1] == (byte) 0x8b) {
-                        String decompressed = decompressGzip(receivedData);
+                    ByteBuffer bytes = ByteBuffer.allocate(maxPacketSize);
 
-                        Map map = gson.fromJson(decompressed, Map.class);
-                        lastRequest = ImmutableMap.copyOf(map);// ImmutableMap.of("Zipped?", true, "length", packet.getLength(), "body", decompressed, "map", map);
+                    int aByte;
+
+                    while((aByte = accept.getInputStream().read()) != 0) {
+                        bytes.put((byte)aByte);
                     }
+
+                    int position = bytes.position();
+                    bytes.flip();
+
+                    byte[] message = new byte[position];
+
+                    bytes.get(message);
+
+                    Map map = gson.fromJson(new String(message), Map.class);
+                    lastRequest = ImmutableMap.copyOf(map);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

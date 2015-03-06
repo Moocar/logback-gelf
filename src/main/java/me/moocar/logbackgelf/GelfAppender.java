@@ -109,7 +109,7 @@ public class GelfAppender extends AppenderBase<ILoggingEvent> {
 					fieldTypes, staticAdditionalFields, shortMessageLength, hostName, messagePattern, shortMessagePattern,
                     includeFullMDC);
 
-            appenderExecutor = new AppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
+            appenderExecutor = ("TCP".equalsIgnoreCase(this.transport)) ? new TcpAppenderExecutor(transport, converter)  : new UdpAppenderExecutor(transport, payloadChunker, converter, new Zipper(), chunkThreshold);
 
         } catch (Exception e) {
 
