@@ -3,18 +3,11 @@ package me.moocar.logbackgelf;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 
 public class TestTcpServer implements TestServer {
 
@@ -78,24 +71,6 @@ public class TestTcpServer implements TestServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        }
-
-        public static String decompressGzip(byte[] inputBuf) {
-            byte[] buffer = new byte[inputBuf.length];
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try {
-                GZIPInputStream in = new GZIPInputStream(new ByteArrayInputStream(inputBuf));
-                try {
-                    for (int bytesRead = 0; bytesRead != -1; bytesRead = in.read(buffer)) {
-                        out.write(buffer, 0, bytesRead);
-                    }
-                    return new String(out.toByteArray(), "UTF-8");
-                } catch (Exception e) {
-                    return "Error reading bytes" + e.getMessage();
-                }
-            } catch (IOException e) {
-                return "Error creating input stream" + e.getMessage();
             }
         }
 
