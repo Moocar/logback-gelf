@@ -27,7 +27,7 @@ public class TcpTransport implements Transport {
                 try {
                     writeNullTerminated(data, s.getOutputStream());
                 } catch (IOException e) {
-                    // Silently fail, same as UDP
+                    handleException(e);
                 }
             }
         });
@@ -41,7 +41,7 @@ public class TcpTransport implements Transport {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        // Ignore, closing socket.
+                        handleException(e);
                     }
                     socket = null;
                 }
@@ -53,7 +53,7 @@ public class TcpTransport implements Transport {
             }
             function.call(socket);
         } catch (IOException e) {
-            // Silently fail, same as UDP
+            handleException(e);
         }
     }
 
@@ -71,10 +71,15 @@ public class TcpTransport implements Transport {
                         writeNullTerminated(packet, s.getOutputStream());
                     }
                 } catch (IOException e) {
-                    // Silently fail, same as UDP
+                    handleException(e);
                 }
             }
         });
+    }
+
+    private void handleException(Exception e) {
+        // Silently fail, same as UDP
+//        e.printStackTrace();
     }
 
     private void writeNullTerminated(byte[] packet, OutputStream outputStream) throws IOException {
