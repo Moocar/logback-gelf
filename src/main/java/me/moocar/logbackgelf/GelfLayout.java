@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +17,7 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 
+import ch.qos.logback.core.LayoutBase;
 import ch.qos.logback.core.encoder.EncoderBase;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -22,23 +26,21 @@ import com.google.gson.GsonBuilder;
 /**
  * Responsible for formatting a log event into a GELF message
  */
-public class GelfLayout<E extends ILoggingEvent> extends EncoderBase<E> {
+public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
-    private String facility;
-    private boolean useLoggerName;
-    private boolean useThreadName;
-    private boolean useMarker;
+    private String facility = "GELF";
+    private boolean useLoggerName = false;
+    private boolean useThreadName = false;
+    private boolean useMarker = false;
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> fieldTypes = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
-    private int shortMessageLength;
-    private String hostName;
+    private int shortMessageLength = 255;
+    private String hostName = getLocalHostName();
     private final Gson gson;
     private PatternLayout patternLayout = new PatternLayout();
     private PatternLayout shortPatternLayout = new PatternLayout();
-    private boolean includeFullMDC;
-
-    private OutputStreamWriter outputStreamWriter;
+    private boolean includeFullMDC = false;
 
     static Map<String, Method> primitiveTypes;
 
@@ -71,25 +73,13 @@ public class GelfLayout<E extends ILoggingEvent> extends EncoderBase<E> {
     }
 
     @Override
-    public void init(OutputStream os) throws IOException {
-        super.init(os);
-        this.outputStreamWriter = new OutputStreamWriter(os);
-    }
-
-    @Override
-    public void doEncode(E event) throws IOException {
+    public String doLayout(E event) {
         addInfo("encoding");
         Map<String, Object> map = mapFields(event);
         addInfo("created" + map);
-        String json = gson.toJson(map);
-        byte[] bytes = json.getBytes();
-        outputStream.write(bytes);
-//        gson.toJson(map, outputStreamWriter);
-
-    }
-
-    @Override
-    public void close() throws IOException {
+        String jsonString = gson.toJson(map);
+        addInfo("json size" + jsonString.getBytes(Charset.forName("UTF-8")).length);
+        return jsonString;
     }
 
     /**
@@ -117,7 +107,7 @@ public class GelfLayout<E extends ILoggingEvent> extends EncoderBase<E> {
 
         map.put("timestamp", logEventTimeTimeStamp);
 
-        map.put("version", "1.0");
+        map.put("version", "1.1");
 
         map.put("level", LevelToSyslogSeverity.convert(logEvent));
 
@@ -218,6 +208,16 @@ public class GelfLayout<E extends ILoggingEvent> extends EncoderBase<E> {
             return fullMessage.substring(0, shortMessageLength);
         }
         return fullMessage;
+    }
+
+    private String getLocalHostName() {
+        try {
+            return InternetUtils.getLocalHostName();
+        } catch (SocketException e) {
+            return "UNKNOWN";
+        } catch (UnknownHostException e) {
+            return "UNKNOWN";
+        }
     }
 
     //////////// Logback Property Getter/Setters ////////////////
@@ -391,17 +391,6 @@ public class GelfLayout<E extends ILoggingEvent> extends EncoderBase<E> {
 
     public void setFieldTypes(final Map<String, String> fieldTypes) {
         this.fieldTypes = fieldTypes;
-    }
-
-    /**
-     * The length of the message to truncate to
-     */
-    public int getShortMessageLength() {
-        return shortMessageLength;
-    }
-
-    public void setShortMessageLength(int shortMessageLength) {
-        this.shortMessageLength = shortMessageLength;
     }
 
     public PatternLayout getShortMessagePatternLayout() {

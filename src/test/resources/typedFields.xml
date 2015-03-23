@@ -1,20 +1,23 @@
 <configuration debug="true">
-  <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
-    <facility>logback-gelf-test</facility>
-    <graylog2ServerHost>localhost</graylog2ServerHost>
-    <graylog2ServerPort>12201</graylog2ServerPort>
-    <useLoggerName>true</useLoggerName>
-    <hostName>Test</hostName>
-    <graylog2ServerVersion>0.9.6</graylog2ServerVersion>
-    <chunkThreshold>1000</chunkThreshold>
-    <messagePattern>%m%rEx</messagePattern>
-    <additionalField>ipAddress:_ip_address</additionalField>
-    <additionalField>requestId:_request_id</additionalField>
-    <fieldType>_request_id:int</fieldType>
-    <includeFullMDC>true</includeFullMDC>
-  </appender>
+    <appender name="GELF UDP appender" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <remoteHost>localhost</remoteHost>
+        <port>12201</port>
+        <encoder name = "GZIP Encoder" class="me.moocar.logbackgelf.GelfEncoder">
+            <layout name="GELF Layout" class="me.moocar.logbackgelf.GelfLayout">
+                <messagePatternLayout><pattern>%m%rEx</pattern></messagePatternLayout>
+                <shortMessagePatternLayout><pattern>%m%rEx</pattern></shortMessagePatternLayout>
+                <facility>logback-gelf-test</facility>
+                <useLoggerName>true</useLoggerName>
+                <hostName>Test</hostName>
+                <additionalField>ipAddress:_ip_address</additionalField>
+                <additionalField>requestId:_request_id</additionalField>
+                <fieldType>_request_id:int</fieldType>
+                <includeFullMDC>true</includeFullMDC>
+            </layout>
+        </encoder>
+    </appender>
 
   <root level="debug">
-    <appender-ref ref="GELF" />
+    <appender-ref ref="GELF UDP appender" />
   </root>
 </configuration>

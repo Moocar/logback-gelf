@@ -1,6 +1,7 @@
 package me.moocar.logbackgelf;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 /**
@@ -11,6 +12,11 @@ public class MessageIdProvider {
     private final int messageIdLength;
     private final MessageDigest messageDigest;
     private final String hostname;
+
+    public MessageIdProvider(String hostname) throws NoSuchAlgorithmException {
+        this(8, MessageDigest.getInstance("MD5"), hostname);
+
+    }
 
     public MessageIdProvider(int message_id_length, MessageDigest messageDigest, String hostname) {
         messageIdLength = message_id_length;
