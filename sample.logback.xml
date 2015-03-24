@@ -1,0 +1,30 @@
+<configuration>
+    <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <remoteHost>localhost</remoteHost>
+        <port>12201</port>
+        <encoder class="me.moocar.logbackgelf.GelfEncoder">
+            <layout class="me.moocar.logbackgelf.GelfLayout">
+                <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%ex{short}%.100m</pattern>
+                </shortMessageLayout>
+                <fullMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%rEx%m</pattern>
+                </fullMessageLayout>
+                <facility>logback-gelf-test</facility>
+                <useLoggerName>true</useLoggerName>
+                <useThreadName>true</useThreadName>
+                <useMarker>true</useMarker>
+                <host>Test</host>
+                <additionalField>ipAddress:_ip_address</additionalField>
+                <additionalField>requestId:_request_id</additionalField>
+                <includeFullMDC>true</includeFullMDC>
+                <fieldType>_request_id:long</fieldType>
+                <staticAdditionalField>_node_name:www013</staticAdditionalField>
+            </layout>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="GELF UDP APPENDER" />
+    </root>
+</configuration>

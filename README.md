@@ -3,9 +3,11 @@ LOGBACK-GELF - A GELF Appender for Logback
 
 **NOTE: Version 0.2 is a BIG change. Check it out**
 
-Use this appender to log messages with logback to a Graylog2 server via GELF messages.
+Use this appender to log messages with logback to a Graylog2 server
+via GELF v1.1 messages.
 
-If you don't know what [Graylog2](http://graylog2.org) is, jump on the band wagon!
+If you don't know what [Graylog2](http://graylog2.org) is, jump on the
+band wagon!
 
 Installation
 -----------------------------------
@@ -30,7 +32,7 @@ Features
 * Static fields
 * Very Few dependencies
 
-See defailts after the configuration section
+See defaults after the configuration section
 
 Configuring Logback
 ---------------------
@@ -57,13 +59,17 @@ An example of the new configuration is below:
             <port>12201</port>
             <encoder class="me.moocar.logbackgelf.GelfEncoder">
                 <layout class="me.moocar.logbackgelf.GelfLayout">
-                    <messagePatternLayout><pattern>%m%rEx</pattern></messagePatternLayout>
-                    <shortMessagePatternLayout><pattern>%m%rEx</pattern></shortMessagePatternLayout>
+                    <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                        <pattern>%ex{short}%.100m</pattern>
+                    </shortMessageLayout>
+                    <fullMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                        <pattern>%rEx%m</pattern>
+                    </fullMessageLayout>
                     <facility>logback-gelf-test</facility>
                     <useLoggerName>true</useLoggerName>
                     <useThreadName>true</useThreadName>
                     <useMarker>true</useMarker>
-                    <hostName>Test</hostName>
+                    <host>Test</host>
                     <additionalField>ipAddress:_ip_address</additionalField>
                     <additionalField>requestId:_request_id</additionalField>
                     <includeFullMDC>true</includeFullMDC>
@@ -91,41 +97,62 @@ The Appender Configuration is as follows:
 
 Send logs over TCP. Note that [gzip is not supported](https://github.com/Graylog2/graylog2-server/issues/127).
 
-*   **remoteHost**: The remote graylog server host to send log messages to (DNS or IP). Default: "localhost"
-*   **port**: The remote graylog server port. Default: 12201
-*   **queueSize**: The number of log to keep in memory while the graylog server can't be reached. Default: 128
-*   **acceptConnectionTimeout**: Amount of time to wait for a connection to be established to the server. Default: 1000 ms
+* **remoteHost**: The remote graylog server host to send log messages
+  to (DNS or IP). Default: `"localhost"`
+* **port**: The remote graylog server port. Default: `12201`
+* **queueSize**: The number of log to keep in memory while the graylog
+  server can't be reached. Default: `128`
+* **acceptConnectionTimeout**: Milliseconds to wait for a connection
+  to be established to the server before failing. Default: `1000` ms
 
 ### me.moocar.logbackgelf.GelfUDPAppender
 
 Send logs over UDP. Messages will be chunked according to the [gelf spec](https://www.graylog.org/resources/gelf-2/)
 
-*   **remoteHost**: The remote graylog server host to send log messages to (DNS or IP). Default: "localhost"
-*   **port**: The remote graylog server port. Default: 12201
-*   **queueSize**: The number of log to keep in memory before a flush is called (you probably won't need to change this). Default: 1024
+* **remoteHost**: The remote graylog server host to send log messages
+  to (DNS or IP). Default: `"localhost"`
+* **port**: The remote graylog server port. Default: `12201`
+* **queueSize**: The number of log to keep in memory before a flush is
+  called (you probably won't need to change this). Default: `1024`
 
 ## me.moocar.logbackgelf.GelfLayout
 
 This is where most configuration resides, since it's the bit that
 actually converts a log event into a GELF compatible string.
 
-*   **facility**: The name of your service. Appears in facility column in graylog2-web-interface. Default: "GELF"
-*   **useLoggerName**: If true, an additional field call "_loggerName" will be added to each gelf message. Its contents
-will be the fully qualified name of the logger. e.g: com.company.Thingo. Default: false;
-*   **useThreadName**: If true, an additional field call "_threadName" will be added to each gelf message. Its contents
-will be the name of the thread. Default: false;
-*   **hostName** The hostname of the sending host. Default: getLocalHostName()
-*   **useMarker**: If true, and the user has used an slf4j marker (http://slf4j.org/api/org/slf4j/Marker.html) in their
-log message by using one of the marker-overloaded log methods (http://slf4j.org/api/org/slf4j/Logger.html), then the
-marker.toString() will be added to the gelf message as the field "_marker".  Default: false;
-*   **messagePatternLayout**: The layout of the actual message according to
-[PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Required
-*   **shortMessagePatternLayout**: The layout of the short message according to
-[PatternLayout](http://logback.qos.ch/manual/layouts.html#conversionWord). Required
-*   **additionalFields**: See additional fields below. Default: empty
-*   **fieldType**: See field type conversion below. Default: empty (fields sent as string)
-*   **staticAdditionalFields**: See static additional fields below. Default: empty
-*   **includeFullMDC**: See additional fields below. Default: false
+* **facility**: The name of your service. Appears in facility column
+  in graylog2-web-interface. Default: `"GELF"`
+* **useLoggerName**: If true, an additional field call "_loggerName"
+  will be added to each gelf message. Its contents will be the fully
+  qualified name of the logger. e.g: com.company.Thingo. Default:
+  `false`;
+* **useThreadName**: If true, an additional field call "_threadName"
+  will be added to each gelf message. Its contents will be the name of
+  the thread. Default: `false`;
+* **host** The hostname of the sending host. Displayed under `source`
+  on web interface. Default: `getLocalHostName()`
+* **useMarker**: If true, and the user has used an slf4j marker
+  (http://slf4j.org/api/org/slf4j/Marker.html) in their log message by
+  using one of the marker-overloaded log methods
+  (http://slf4j.org/api/org/slf4j/Logger.html), then the
+  marker.toString() will be added to the gelf message as the field
+  "_marker". Default: `false`;
+* **shortMessageLayout**: The
+  [Layout](http://logback.qos.ch/manual/layouts.html) used to create
+  the gelf `short_message` field. Shows up in the message column of
+  the log summary in the web interface. Default: `"%ex{short}%.100m"`
+  ([PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout))
+* **fullMessageLayout**: The
+  [Layout](http://logback.qos.ch/manual/layouts.html) used to create
+  the gelf `full_message` field. Shows up in the message field of the
+  log details in the web interface. Default: `""%rEx%m""`
+  ([PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout))
+* **additionalFields**: See additional fields below. Default: empty
+* **fieldType**: See field type conversion below. Default: empty
+  (fields sent as string)
+* **staticAdditionalFields**: See static additional fields below.
+  Default: empty
+* **includeFullMDC**: See additional fields below. Default: `false`
 
 Extra features
 -----------------

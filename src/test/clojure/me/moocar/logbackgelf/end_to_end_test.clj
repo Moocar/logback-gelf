@@ -175,11 +175,12 @@
 
 (defn make-config
   []
-  {:message-pattern "%m%rEx"
+  {:full-message-pattern "%rEx%m"
+   :short-message-pattern "%.5m"
    :facility "logback-gelf-test"
    :use-logger-name? true
    :use-marker? true
-   :hostname "Test"
+   :host "Test"
    :version "1.1"
    :appender {:type :udp
               :port 12201}
@@ -198,14 +199,14 @@
         (concat
          [:layout {:name "Gelf Layout"
                    :class "me.moocar.logbackgelf.GelfLayout"}
-          [:messagePatternLayout
-           [:pattern (:message-pattern config)]]
-          [:shortMessagePatternLayout
-           [:pattern (:message-pattern config)]]
+          [:fullMessageLayout {:class "ch.qos.logback.classic.PatternLayout"}
+           [:pattern (:full-message-pattern config)]]
+          [:shortMessageLayout {:class "ch.qos.logback.classic.PatternLayout"}
+           [:pattern (:short-message-pattern config)]]
           [:facility (:facility config)]
           [:useLoggerName (:use-logger-name? config)]
           [:useMarker (:use-marker? config)]
-          [:hostName (:hostname config)]
+          [:host (:host config)]
           [:additionalField "ipAddress:_ip_address"]
           [:additionalField "requestId:_request_id"]
           [:includeFullMDC (:include-full-mdc? config)]]
@@ -284,7 +285,7 @@
   (-> log
       (update :level level->syslog-int)
       (dissoc :marker)
-      (assoc :host (:hostname config)
+      (assoc :host (:host config)
              :facility (:facility config)
              :version (:version config))
       (cond-> (:marker log)
@@ -398,3 +399,9 @@
 
 (deftest t
   (t-all))
+
+(defn test-endpoint []
+  (let [config (make-config)]
+    (configure-logback-xml (xml-input-stream (logback-xml-sexp config)))
+    (let [logger (LoggerFactory/getLogger "this_logger")]
+      (.error logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) (ex-info "ERROR ME TIMBER" {})))))

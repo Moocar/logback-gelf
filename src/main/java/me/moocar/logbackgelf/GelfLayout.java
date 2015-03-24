@@ -1,8 +1,5 @@
 package me.moocar.logbackgelf;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -17,8 +14,8 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
 
+import ch.qos.logback.core.Layout;
 import ch.qos.logback.core.LayoutBase;
-import ch.qos.logback.core.encoder.EncoderBase;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,6 +25,9 @@ import com.google.gson.GsonBuilder;
  */
 public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
+    private final String DEFAULT_FULL_MESSAGE_PATTERN = "%rEx%m";
+    private final String DEFAULT_SHORT_MESSAGE_PATTERN = "%ex{short}%.100m";
+
     private String facility = "GELF";
     private boolean useLoggerName = false;
     private boolean useThreadName = false;
@@ -36,10 +36,10 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     private Map<String, String> fieldTypes = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
     private int shortMessageLength = 255;
-    private String hostName = getLocalHostName();
+    private String host = getLocalHostName();
     private final Gson gson;
-    private PatternLayout patternLayout = new PatternLayout();
-    private PatternLayout shortPatternLayout = new PatternLayout();
+    private Layout fullMessageLayout;
+    private Layout shortMessageLayout;
     private boolean includeFullMDC = false;
 
     static Map<String, Method> primitiveTypes;
@@ -72,6 +72,31 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
         this.gson = gsonBuilder.create();
     }
 
+    public void start() {
+        if (isStarted()) return;
+        int errorCount = 0;
+
+        if (fullMessageLayout == null) {
+            PatternLayout layout = new PatternLayout();
+            layout.setPattern(DEFAULT_FULL_MESSAGE_PATTERN);
+            layout.setContext(this.getContext());
+            layout.start();
+            this.fullMessageLayout = layout;
+        }
+
+        if (shortMessageLayout == null) {
+            PatternLayout layout = new PatternLayout();
+            layout.setPattern(DEFAULT_SHORT_MESSAGE_PATTERN);
+            layout.setContext(this.getContext());
+            layout.start();
+            this.shortMessageLayout = layout;
+        }
+
+        if (errorCount == 0) {
+            super.start();
+        }
+    }
+
     @Override
     public String doLayout(E event) {
         addInfo("encoding");
@@ -93,9 +118,9 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
         map.put("facility", facility);
 
-        map.put("host", hostName);
+        map.put("host", host);
 
-        String message = patternLayout.doLayout(logEvent);
+        String message = fullMessageLayout.doLayout(logEvent);
 
         map.put("full_message", message);
         map.put("short_message", truncateToShortMessage(message, logEvent));
@@ -200,8 +225,8 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     }
 
     private String truncateToShortMessage(String fullMessage, ILoggingEvent logEvent) {
-        if ( shortPatternLayout != null ) {
-            return shortPatternLayout.doLayout(logEvent);
+        if ( shortMessageLayout != null ) {
+            return shortMessageLayout.doLayout(logEvent);
         }
 
         if (fullMessage.length() > shortMessageLength) {
@@ -321,16 +346,16 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     }
 
     /**
-     * Override the local hostname using a config option
-     * @return the local hostname (defaults to getLocalHost() if not overridden
+     * Override the local host using a config option
+     * @return the local host (defaults to getLocalHost() if not overridden
      * in config
      */
-    public String getHostName() {
-        return hostName;
+    public String getHost() {
+        return host;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setHost(String host) {
+        this.host = host;
     }
     /**
      * Add an additional field. This is mainly here for compatibility with logback.xml
@@ -393,19 +418,19 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
         this.fieldTypes = fieldTypes;
     }
 
-    public PatternLayout getShortMessagePatternLayout() {
-        return shortPatternLayout;
+    public Layout getFullMessageLayout() {
+        return fullMessageLayout;
     }
 
-    public void setShortMessagePatternLayout(PatternLayout shortPatternLayout) {
-        this.shortPatternLayout = shortPatternLayout;
+    public void setFullMessageLayout(Layout fullMessageLayout) {
+        this.fullMessageLayout = fullMessageLayout;
     }
 
-    public PatternLayout getMessagePatternLayout() {
-        return patternLayout;
+    public Layout getShortMessageLayout() {
+        return shortMessageLayout;
     }
 
-    public void setMessagePatternLayout(PatternLayout patternLayout) {
-        this.patternLayout = patternLayout;
+    public void setShortMessageLayout(Layout shortMessageLayout) {
+        this.shortMessageLayout = shortMessageLayout;
     }
 }
