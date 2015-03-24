@@ -17,11 +17,13 @@ Simply add logback-gelf to your classpath. Either
 [download the jar](https://github.com/Moocar/logback-gelf/downloads)
 or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf) land, the dependency details are below.
 
-    <dependency>
-        <groupId>me.moocar</groupId>
-        <artifactId>logback-gelf</artifactId>
-        <version>0.12</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>me.moocar</groupId>
+    <artifactId>logback-gelf</artifactId>
+    <version>0.12</version>
+</dependency>
+```
 
 Features
 --------
