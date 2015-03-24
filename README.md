@@ -54,18 +54,18 @@ adding a Kafka or AMPQ appender should be trivial.
 
 The minimal possible logback.xml you can write is something like.
 
-    <configuration>
-        <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
-            <encoder class="me.moocar.logbackgelf.GelfEncoder">
-                <layout class="me.moocar.logbackgelf.GelfLayout"/>
-            </encoder>
-        </appender>
-
-      <root level="debug">
-        <appender-ref ref="GELF UDP APPENDER" />
-      </root>
-    </configuration>
-
+```xml
+<configuration>
+    <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <encoder class="me.moocar.logbackgelf.GelfEncoder">
+            <layout class="me.moocar.logbackgelf.GelfLayout"/>
+        </encoder>
+    </appender>
+   <root level="debug">
+    <appender-ref ref="GELF UDP APPENDER" />
+  </root>
+</configuration>
+```
 A more complete example that overwrites many default values:
 
     <configuration>
