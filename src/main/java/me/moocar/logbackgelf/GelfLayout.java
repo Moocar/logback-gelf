@@ -148,8 +148,8 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
                 StackTraceElement[] callStackTraces = eventObject.getCallerData();
                 if (callStackTraces != null && callStackTraces.length > 0) {
                     StackTraceElement lastStack = callStackTraces[0];
-                    map.put("file", lastStack.getFileName());
-                    map.put("line", String.valueOf(lastStack.getLineNumber()));
+                    map.put("_file", lastStack.getFileName());
+                    map.put("_line", String.valueOf(lastStack.getLineNumber()));
                 }
             }
         }
