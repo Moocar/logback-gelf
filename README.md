@@ -68,38 +68,40 @@ The minimal possible logback.xml you can write is something like.
 ```
 A more complete example that overwrites many default values:
 
-    <configuration>
-        <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
-            <remoteHost>somehost.com</remoteHost>
-            <port>12201</port>
-            <encoder class="me.moocar.logbackgelf.GelfEncoder">
-                <layout class="me.moocar.logbackgelf.GelfLayout">
-                    <!--An example of overwriting the short message pattern-->
-                    <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
-                        <pattern>%ex{short}%.100m</pattern>
-                    </shortMessageLayout>
-                    <!-- Let's create HTML output of the full message. Because, why not-->
-                    <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
-                        <pattern>%relative%thread%mdc%level%logger%msg</pattern>
-                    </fullMessageLayout>
-                    <useLoggerName>true</useLoggerName>
-                    <useThreadName>true</useThreadName>
-                    <useMarker>true</useMarker>
-                    <host>Test</host>
-                    <additionalField>ipAddress:_ip_address</additionalField>
-                    <additionalField>requestId:_request_id</additionalField>
-                    <includeFullMDC>true</includeFullMDC>
-                    <fieldType>_request_id:long</fieldType>
-                    <!--Facility is not officially supporte in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
-                    <staticAdditionalField>_facility:GELF</staticAdditionalField>
-                </layout>
-            </encoder>
-        </appender>
+```xml
+<configuration>
+    <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <remoteHost>somehost.com</remoteHost>
+        <port>12201</port>
+        <encoder class="me.moocar.logbackgelf.GelfEncoder">
+            <layout class="me.moocar.logbackgelf.GelfLayout">
+                <!--An example of overwriting the short message pattern-->
+                <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%ex{short}%.100m</pattern>
+                </shortMessageLayout>
+                <!-- Let's create HTML output of the full message. Because, why not-->
+                <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
+                    <pattern>%relative%thread%mdc%level%logger%msg</pattern>
+                </fullMessageLayout>
+                <useLoggerName>true</useLoggerName>
+                <useThreadName>true</useThreadName>
+                <useMarker>true</useMarker>
+                <host>Test</host>
+                <additionalField>ipAddress:_ip_address</additionalField>
+                <additionalField>requestId:_request_id</additionalField>
+                <includeFullMDC>true</includeFullMDC>
+                <fieldType>_request_id:long</fieldType>
+                <!--Facility is not officially supporte in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
+                <staticAdditionalField>_facility:GELF</staticAdditionalField>
+            </layout>
+        </encoder>
+    </appender>
 
-        <root level="debug">
-            <appender-ref ref="GELF UDP APPENDER" />
-        </root>
-    </configuration>
+    <root level="debug">
+        <appender-ref ref="GELF UDP APPENDER" />
+    </root>
+</configuration>
+```
 
 To use TCP, simply replace the appender class with
 `me.moocar.logbackgelf.SocketEncoderAppender`. In a perfect world, we
@@ -183,26 +185,24 @@ logback-gelf to look out for this mapping every time a message is logged.
 
 1.  Store IP address in MDC
 
-        // Somewhere in server code that wraps every request
-        ...
-        org.slf4j.MDC.put("ipAddress", getClientIpAddress());
-        ...
+```java
+// Somewhere in server code that wraps every request
+...
+org.slf4j.MDC.put("ipAddress", getClientIpAddress());
+...
+```
 
 2.  Inform logback-gelf of MDC mapping
 
-        ...
-        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
-            ...
-            <additionalField>ipAddress:_ip_address</additionalField>
-            ...
-        </appender>
-        ...
-
-The syntax for the additionalFields in logback.groovy is the following
-
-    additionalFields = [<MDC Key>:<GELF Additional field name>, ...]
-
-where `<MDC Key>` is unquoted and `<GELF Additional field name>` is quoted. It should also begin with an underscore (GELF standard)
+```xml
+...
+<appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+...
+    <additionalField>ipAddress:_ip_address</additionalField>
+    ...
+</appender>
+...
+```
 
 If the property `includeFullMDC` is set to true, all fields from the MDC will be added to the gelf message. Any key, which is not
 listed as `additionalField` will be prefixed with an underscore. Otherwise the field name will be obtained from the
@@ -222,13 +222,15 @@ Now that `facility` is deprecated, this is how you a static facility.
 
 E.g in the appender configuration:
 
-        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
-            ...
-            <staticAdditionalField>_node_name:www013</staticAdditionalField>
-            <staticAdditionalField>_facility:GELF</staticAdditionalField>
-            ...
-        </appender>
-        ...
+```xml
+<appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+    ...
+    <staticAdditionalField>_node_name:www013</staticAdditionalField>
+    <staticAdditionalField>_facility:GELF</staticAdditionalField>
+    ...
+</appender>
+...
+```
 
 Field type conversion
 -----------------
@@ -237,12 +239,14 @@ You can configure a specific field to be converted to a numeric type. Key is the
 begin with an underscore), value is the type to convert to. Currently supported types are ``int``, ``long``, ``float``
 and ``double``.
 
-        <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
-            ...
-            <fieldType>_request_id:long</fieldType>
-            ...
-        </appender>
-        ...
+```xml
+<appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
+    ...
+    <fieldType>_request_id:long</fieldType>
+    ...
+</appender>
+...
+```
 
 logback-gelf will leave the field value alone (i.e.: send it as String) and print the stacktrace if the conversion fails.
 
