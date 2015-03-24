@@ -177,18 +177,18 @@
   []
   {:full-message-pattern "%rEx%m"
    :short-message-pattern "%.5m"
-   :facility "logback-gelf-test"
    :use-logger-name? true
    :use-marker? true
    :host "Test"
    :version "1.1"
    :appender {:type :udp
               :port 12201}
+   :static-additional-fields {"_facility" "logback-gelf-test"}
    :include-full-mdc? true})
 
 (defn logback-xml-sexp [config]
   (let [appender-type (:type (:appender config))]
-    [:configuration #_{:debug "true"}
+    [:configuration {:debug "true"}
      [:appender {:name "GELF Appender"
                  :class (get appender-classes appender-type)}
       [:remoteHost "localhost"]
@@ -203,7 +203,6 @@
            [:pattern (:full-message-pattern config)]]
           [:shortMessageLayout {:class "ch.qos.logback.classic.PatternLayout"}
            [:pattern (:short-message-pattern config)]]
-          [:facility (:facility config)]
           [:useLoggerName (:use-logger-name? config)]
           [:useMarker (:use-marker? config)]
           [:host (:host config)]
@@ -400,8 +399,10 @@
 (deftest t
   (t-all))
 
-(defn test-endpoint []
+(defn send-request
+  "For dev purposes"
+  []
   (let [config (make-config)]
     (configure-logback-xml (xml-input-stream (logback-xml-sexp config)))
     (let [logger (LoggerFactory/getLogger "this_logger")]
-      (.error logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) (ex-info "ERROR ME TIMBER" {})))))
+      (.debug logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {})))))

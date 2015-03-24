@@ -1,7 +1,8 @@
 LOGBACK-GELF - A GELF Appender for Logback
 ==========================================
 
-**NOTE: Version 0.2 is a BIG change. Check it out**
+**NOTE: Version 0.2 is a BIG change that brings this library inline
+  with Graylog 1.0. Check it out**
 
 Use this appender to log messages with logback to a Graylog2 server
 via GELF v1.1 messages.
@@ -51,21 +52,36 @@ the Encoder/Layouts are (mostly) the same. This required a significant
 refactor but will provide more flexibility going forward. For example,
 adding a Kafka or AMPQ appender should be trivial.
 
-An example of the new configuration is below:
+The minimal possible logback.xml you can write is something like.
 
     <configuration>
         <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
-            <remoteHost>localhost</remoteHost>
+            <encoder class="me.moocar.logbackgelf.GelfEncoder">
+                <layout class="me.moocar.logbackgelf.GelfLayout"/>
+            </encoder>
+        </appender>
+
+      <root level="debug">
+        <appender-ref ref="GELF UDP APPENDER" />
+      </root>
+    </configuration>
+
+A more complete example that overwrites many default values:
+
+    <configuration>
+        <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+            <remoteHost>somehost.com</remoteHost>
             <port>12201</port>
             <encoder class="me.moocar.logbackgelf.GelfEncoder">
                 <layout class="me.moocar.logbackgelf.GelfLayout">
+                    <!--An example of overwriting the short message pattern-->
                     <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
                         <pattern>%ex{short}%.100m</pattern>
                     </shortMessageLayout>
-                    <fullMessageLayout class="ch.qos.logback.classic.PatternLayout">
-                        <pattern>%rEx%m</pattern>
+                    <!-- Let's create HTML output of the full message. Because, why not-->
+                    <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
+                        <pattern>%relative%thread%mdc%level%logger%msg</pattern>
                     </fullMessageLayout>
-                    <facility>logback-gelf-test</facility>
                     <useLoggerName>true</useLoggerName>
                     <useThreadName>true</useThreadName>
                     <useMarker>true</useMarker>
@@ -74,14 +90,15 @@ An example of the new configuration is below:
                     <additionalField>requestId:_request_id</additionalField>
                     <includeFullMDC>true</includeFullMDC>
                     <fieldType>_request_id:long</fieldType>
-                    <staticAdditionalField>_node_name:www013</staticAdditionalField>
+                    <!--Facility is not officially supporte in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
+                    <staticAdditionalField>_facility:GELF</staticAdditionalField>
                 </layout>
             </encoder>
         </appender>
 
-      <root level="debug">
-        <appender-ref ref="GELF UDP APPENDER" />
-      </root>
+        <root level="debug">
+            <appender-ref ref="GELF UDP APPENDER" />
+        </root>
     </configuration>
 
 To use TCP, simply replace the appender class with
@@ -95,7 +112,8 @@ The Appender Configuration is as follows:
 
 ### me.moocar.logbackgelf.SocketEncoderAppender
 
-Send logs over TCP. Note that [gzip is not supported](https://github.com/Graylog2/graylog2-server/issues/127).
+Send logs over TCP. Note that
+[gzip is not supported](https://github.com/Graylog2/graylog2-server/issues/127).
 
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
@@ -120,8 +138,6 @@ Send logs over UDP. Messages will be chunked according to the [gelf spec](https:
 This is where most configuration resides, since it's the bit that
 actually converts a log event into a GELF compatible string.
 
-* **facility**: The name of your service. Appears in facility column
-  in graylog2-web-interface. Default: `"GELF"`
 * **useLoggerName**: If true, an additional field call "_loggerName"
   will be added to each gelf message. Its contents will be the fully
   qualified name of the logger. e.g: com.company.Thingo. Default:
@@ -151,6 +167,7 @@ actually converts a log event into a GELF compatible string.
 * **fieldType**: See field type conversion below. Default: empty
   (fields sent as string)
 * **staticAdditionalFields**: See static additional fields below.
+  Note, now that facility is deprecated, use this to set a facility
   Default: empty
 * **includeFullMDC**: See additional fields below. Default: `false`
 
@@ -197,14 +214,18 @@ added to a gelf message.
 Static Additional Fields
 -----------------
 
-Use static additional fields when you want to add a static key value pair to every GELF message. Key is the additional
-field key (and should thus begin with an underscore). The value is a static string.
+Use static additional fields when you want to add a static key value
+pair to every GELF message. Key is the additional field key (and
+should thus begin with an underscore). The value is a static string.
+
+Now that `facility` is deprecated, this is how you a static facility.
 
 E.g in the appender configuration:
 
         <appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
             ...
             <staticAdditionalField>_node_name:www013</staticAdditionalField>
+            <staticAdditionalField>_facility:GELF</staticAdditionalField>
             ...
         </appender>
         ...

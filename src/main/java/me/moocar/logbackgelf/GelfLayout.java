@@ -28,7 +28,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     private final String DEFAULT_FULL_MESSAGE_PATTERN = "%rEx%m";
     private final String DEFAULT_SHORT_MESSAGE_PATTERN = "%ex{short}%.100m";
 
-    private String facility = "GELF";
     private boolean useLoggerName = false;
     private boolean useThreadName = false;
     private boolean useMarker = false;
@@ -115,8 +114,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
      */
     private Map<String, Object> mapFields(E logEvent) {
         Map<String, Object> map = new HashMap<String, Object>();
-
-        map.put("facility", facility);
 
         map.put("host", host);
 
@@ -246,17 +243,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     }
 
     //////////// Logback Property Getter/Setters ////////////////
-
-    /**
-     * The name of your service. Appears in facility column in graylog2-web-interface
-     */
-    public String getFacility() {
-        return facility;
-    }
-
-    public void setFacility(String facility) {
-        this.facility = facility;
-    }
 
     /**
      * If true, an additional field call "_loggerName" will be added to each gelf message. Its contents will be the
