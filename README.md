@@ -1,21 +1,19 @@
 LOGBACK-GELF - A GELF Appender for Logback
 ==========================================
 
-**NOTE: Version 0.2 is a BIG change that brings this library inline
-  with Graylog 1.0. Check it out**
+A [logback](http://logback.qos.ch/) appender that serializes logs to
+[GELF](https://www.graylog.org/resources/gelf-2/) and transports them
+to [Graylog](https://www.graylog.org/) servers.
 
-Use this appender to log messages with logback to a Graylog2 server
-via GELF v1.1 messages.
+**NOTE: Version 0.2 is NOT backwards compatible with previous versions
+  (<= 0.12). [Read about the changes](#v02-changes)**
 
-If you don't know what [Graylog2](http://graylog2.org) is, jump on the
-band wagon!
-
-Installation
+Depdency information
 -----------------------------------
 
-Simply add logback-gelf to your classpath. Either
-[download the jar](https://github.com/Moocar/logback-gelf/downloads)
-or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf) land, the dependency details are below.
+Logback-gelf is up on
+[Maven Central](http://search.maven.org/#artifactdetails%7Cme.moocar%7Clogback-gelf%7C0.12%7Cjar).
+If you're a maven user, the dependency information is below:
 
 ```xml
 <dependency>
@@ -28,31 +26,18 @@ or if you're in [maven](http://mvnrepository.com/artifact/me.moocar/logback-gelf
 Features
 --------
 
-* Append via TCP or UDP (with chunking) to remote graylog server
+* Append via TCP or UDP (with chunking) to a remote graylog server
 * MDC k/v converted to fields
 * Fields may have types
 * Auto include logger_name
 * Static fields
-* Very Few dependencies
-
-See defaults after the configuration section
+* Very Few dependencies (Logback and GSON)
 
 Configuring Logback
 ---------------------
 
-## As of version 0.2
-
-Configuration has been reworked to be more idiomatic with logback. The
-primary driver was adding TCP transport. Under 0.12 configuration, a
-transport option would have been added to the main appender, but then
-there would be no logical place to put TCP specific configuration such
-as connectTimeout. UDP also has its own quirks, requiring chunking and
-the option of GZIP.
-
-So the new configuration provides both UDP and TCP appenders, but the
-the Encoder/Layouts are (mostly) the same. This required a significant
-refactor but will provide more flexibility going forward. For example,
-adding a Kafka or AMPQ appender should be trivial.
+__Note, 0.2 is a breaking version. It is NOT compatible with 0.12 and
+previous versions. Read about the changes [here](#v02-changes)__
 
 The minimal possible logback.xml you can write is something like.
 
@@ -68,7 +53,9 @@ The minimal possible logback.xml you can write is something like.
   </root>
 </configuration>
 ```
-A more complete example that overwrites many default values:
+
+A more complete example that shows how you would overwrite many
+default values:
 
 ```xml
 <configuration>
@@ -105,12 +92,15 @@ A more complete example that overwrites many default values:
 </configuration>
 ```
 
-To use TCP, simply replace the appender class with
-`me.moocar.logbackgelf.SocketEncoderAppender`. In a perfect world, we
-would use `ch.qos.logback.classic.net.SocketAppender`. Unfortunately,
-it is hard coded to send serialized java objects over the wire,
-whereas we obviously need GELF serialization. I may move this appender
-into its own library in future.
+## Transports
+
+Both UDP and TCP outputs are supported. To use TCP, simply replace the
+appender class with `me.moocar.logbackgelf.SocketEncoderAppender`. In
+a perfect world, we would use
+`ch.qos.logback.classic.net.SocketAppender`. Unfortunately, it is hard
+coded to send serialized java objects over the wire, whereas we
+obviously need GELF serialization. I may move this appender into its
+own library in future.
 
 The Appender Configuration is as follows:
 
@@ -252,6 +242,21 @@ and ``double``.
 
 logback-gelf will leave the field value alone (i.e.: send it as String) and print the stacktrace if the conversion fails.
 
+V0.2 Changes
+------------
+
+Configuration has been reworked to fit better into the logback
+ecosystem. The primary driver was adding TCP transport. Under 0.12
+configuration, a transport option would have been added to the main
+appender, but then there would be no logical place to put TCP specific
+configuration such as connectTimeout. UDP also has its own quirks,
+requiring chunking and the option of GZIP.
+
+So the new configuration follows the logback way and provides both UDP
+and TCP appenders, and the GELF serialization logic is now in a
+GelfLayout. This required a significant refactor but will provide more
+flexibility going forward. For example, adding a Kafka or AMPQ
+appender should now be trivial.
 
 Change Log
 --------------------------------------
