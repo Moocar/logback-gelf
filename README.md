@@ -1,14 +1,14 @@
 LOGBACK-GELF - A GELF Appender for Logback
 ==========================================
 
-A [Logback](http://logback.qos.ch/) appender that serializes logs to
+A [Logback](http://logback.qos.ch/) appender that encodes logs to
 [GELF](https://www.graylog.org/resources/gelf-2/) and transports them
 to [Graylog](https://www.graylog.org/) servers.
 
 **NOTE: Version 0.2 is NOT backwards compatible with previous versions
   (<= 0.12). [Read about the changes](#v02-changes)**
 
-Depdency information
+Dependency information
 -----------------------------------
 
 Logback-gelf is up on
@@ -59,7 +59,8 @@ default values:
 
 ```xml
 <configuration>
-    <appender name="GELF UDP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
+    <!--Use TCP instead of UDP-->
+    <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
         <remoteHost>somehost.com</remoteHost>
         <port>12201</port>
         <encoder class="me.moocar.logbackgelf.GelfEncoder">
@@ -68,7 +69,7 @@ default values:
                 <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
                     <pattern>%ex{short}%.100m</pattern>
                 </shortMessageLayout>
-                <!-- Let's create HTML output of the full message. Because, why not-->
+                <!-- Use HTML output of the full message. Yes, any layout can be used (please don't actually do this)-->
                 <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
                     <pattern>%relative%thread%mdc%level%logger%msg</pattern>
                 </fullMessageLayout>
@@ -87,7 +88,7 @@ default values:
     </appender>
 
     <root level="debug">
-        <appender-ref ref="GELF UDP APPENDER" />
+        <appender-ref ref="GELF TCP APPENDER" />
     </root>
 </configuration>
 ```
@@ -100,19 +101,18 @@ actually converts a log event into a GELF compatible JSON string.
 
 * **useLoggerName**: If true, an additional field call "_loggerName"
   will be added to each gelf message. Its contents will be the fully
-  qualified name of the logger. e.g: com.company.Thingo. Default:
+  qualified name of the logger. e.g: `com.company.Thingo`. Default:
   `false`;
 * **useThreadName**: If true, an additional field call "_threadName"
   will be added to each gelf message. Its contents will be the name of
   the thread. Default: `false`;
-* **host** The hostname of the sending host. Displayed under `source`
-  on web interface. Default: `getLocalHostName()`
-* **useMarker**: If true, and the user has used an slf4j marker
-  (http://slf4j.org/api/org/slf4j/Marker.html) in their log message by
-  using one of the marker-overloaded log methods
-  (http://slf4j.org/api/org/slf4j/Logger.html), then the
-  marker.toString() will be added to the gelf message as the field
-  "_marker". Default: `false`;
+* **host** The hostname of the host from which the log is being sent.
+  Displayed under `source` on web interface. Default:
+  `getLocalHostName()`
+* **useMarker**: If true, and the user has set a
+   [slf4j Marker](http://slf4j.org/api/org/slf4j/Marker.html) on their
+   log, then the marker.toString() will be added to the gelf message
+   as the field "_marker". Default: `false`
 * **shortMessageLayout**: The
   [Layout](http://logback.qos.ch/manual/layouts.html) used to create
   the gelf `short_message` field. Shows up in the message column of
@@ -121,7 +121,7 @@ actually converts a log event into a GELF compatible JSON string.
 * **fullMessageLayout**: The
   [Layout](http://logback.qos.ch/manual/layouts.html) used to create
   the gelf `full_message` field. Shows up in the message field of the
-  log details in the web interface. Default: `""%rEx%m""`
+  log details in the web interface. Default: `"%rEx%m"`
   ([PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout))
 * **additionalFields**: See additional fields below. Default: empty
 * **fieldType**: See field type conversion below. Default: empty
@@ -140,16 +140,16 @@ graylog transport.
 
 UDP can be configured using the
 `me.moocar.logbackgelf.GelfUDPAppender` appender. Once messages reach
-a certain size, they will bechunked according to the
+a certain size, they will be chunked according to the
 [gelf spec](https://www.graylog.org/resources/gelf-2/). This allows
 for a theoretical maximum encoded log size of about 1 megabyte
-(1040384 bytes).
+(1040384 bytes). Options include:
 
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
-* **queueSize**: The number of log to keep in memory before a flush is
-  called (you probably won't need to change this). Default: `1024`
+* **queueSize**: The number of logs to keep in memory before a flush
+  is called (you probably won't need to change this). Default: `1024`
 
 ### TCP
 
@@ -161,7 +161,7 @@ doesn't give you control of how logs are encoded before being sent
 over TCP, which is why you have to use this appender. To make the
 system as flexible as possible, I moved this new appender into its
 [own library](), so if you want to use it, you'll need to add it to
-your depenencies too. Also note that due to an unresolved
+your depenencies too (sorry). Also note that due to an unresolved
 [Graylog issue](https://github.com/Graylog2/graylog2-server/issues/127),
 GZIP is not supported when using TCP.
 
@@ -169,7 +169,7 @@ GZIP is not supported when using TCP.
 <dependency>
     <groupId>me.moocar</groupId>
     <artifactId>socket-encoder-appender</artifactId>
-    <version>0.12</version>
+    <version>0.1</version>
 </dependency>
 ```
 
@@ -189,8 +189,8 @@ Then, replace the top level Gelf appender with
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
-* **queueSize**: The number of log to keep in memory while the graylog
-  server can't be reached. Default: `128`
+* **queueSize**: The number of logs to keep in memory while the
+  graylog server can't be reached. Default: `128`
 * **acceptConnectionTimeout**: Milliseconds to wait for a connection
   to be established to the server before failing. Default: `1000`
 
