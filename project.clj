@@ -18,5 +18,6 @@
                                   [org.clojure/data.xml "0.0.8"]
                                   [org.clojure/test.check "0.7.0"]
                                   [org.powermock/powermock-api-mockito "1.5.4"]
-                                  [com.stuartsierra/component "0.2.3"]]
+                                  [com.stuartsierra/component "0.2.3"]
+                                  [me.moocar/socket-encoder-appender]]
                    :resource-paths ["src/test/resources"]}})
