@@ -283,31 +283,55 @@ If the conversion fails, logback-gelf will leave the field value alone
 V0.2 Changes
 ------------
 
-Configuration has been reworked to fit better into the logback
-ecosystem. The primary driver was adding TCP transport. Under 0.12
-configuration, a transport option would have been added to the main
-appender, but then there would be no logical place to put TCP specific
-configuration such as connectTimeout. UDP also has its own quirks,
-requiring chunking and the option of GZIP.
+In logback-gelf v0.2, configuration has been reworked to fit better
+into the logback ecosystem. The primary driver was adding TCP
+transport. Under 0.12 configuration, a transport option would have
+been added to the main appender, but then there would be no logical
+place to put TCP specific configuration such as connectTimeout. UDP
+also has its own quirks, requiring chunking and the option of GZIP.
 
 So the new configuration follows the logback way and provides both UDP
 and TCP appenders, and the GELF serialization logic is now in a
 GelfLayout. This required a significant refactor but will provide more
 flexibility going forward. For example, adding a Kafka or AMPQ
-appender should now be trivial.
+appender should now be trivial, and you won't even need to modify this
+library.
 
-To use TCP, simply replace the
-appender class with `me.moocar.logbackgelf.SocketEncoderAppender`. In
-a perfect world, we would use
-`ch.qos.logback.classic.net.SocketAppender`. Unfortunately, it is hard
-coded to send serialized java objects over the wire, whereas we
-obviously need GELF serialization. I may move this appender into its
-own library in future.
+Because it's such a big change, I deliberately broke backwards
+compatibility. Here's a list of all the changes:
+
+- `me.moocar.logbackgelf.GelfAppender` has been removed and replaced
+  with `me.moocar.logbackgelf.GelfUDPAppender` and
+  `me.moocar.logback.net.SocketEncoderAppender` (all non transport
+  information configuration is now under the `GelfLayout` Layout
+- **graylog2ServerHost** is now `GelfUDPAppender.remoteHost` or
+  `SocketEncoderAppender.remoteHost`
+- **graylog2ServerPort** is now `GelfUDPAppender.port` or
+  `SocketEncoderAppender.port`
+- **facility** is deprecated in GELF 1.1, so I've removed it. It can
+  be added using
+  [Static Additional Fields](#static-additional-fields).
+- **hostName** is now **host** (to be inline with Gelf spec)
+- **graylog2ServerVersion** no longer exists since it's assumed that
+  you are using graylog 1.0 or above.
+- **chunkThreshold** is now hard coded. It previously defaulted to
+  1000 for no good reason. It is now set to 8192 bytes, inline with
+  the maximum datagram GELF packet size.
+- **messagePattern** is now **fullMessageLayout** and is no longer
+  assumed to be a
+  [PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout),
+  rather it is a generic
+  [Layout](http://logback.qos.ch/manual/layouts.html), giving you full
+  flexibility over how a message string is transformed. For example,
+  if you really wanted, you could use a XML or HTML layout.
+- **shortMessagePattern** same as above. Note that auto truncation no
+  longer occurs. You must now describe how to format the log message
+  using Layouts.
 
 Change Log
 --------------------------------------
 
-* Development version 0.13-SNAPSHOT (current Git `master`)
+* Development version 0.2-SNAPSHOT (current Git `master`)
 * Release [0.12] on 2014-Nov-04
   * Explicitly set Zipper string encoding to UTF-8 [#41](../../issues/41)
 * Release [0.11] on 2014-May-18
