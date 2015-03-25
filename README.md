@@ -160,8 +160,9 @@ the built in
 doesn't give you control of how logs are encoded before being sent
 over TCP, which is why you have to use this appender. To make the
 system as flexible as possible, I moved this new appender into its
-[own library](), so if you want to use it, you'll need to add it to
-your depenencies too (sorry). Also note that due to an unresolved
+[own library](https://github.com/Moocar/socket-encoder-appender), so
+if you want to use it, you'll need to add it to your dependencies too
+(sorry). Also note that due to an unresolved
 [Graylog issue](https://github.com/Graylog2/graylog2-server/issues/127),
 GZIP is not supported when using TCP.
 
@@ -286,7 +287,7 @@ Tests in Clojure
 Logback-gelf tests are written in [Clojure](http://clojure.org/). I
 could try and justify this by saying that the tests are better than
 they were in java, which is true, but mostly it's because I love
-Clojure and have been using it in my dayjob for over 3 years. I'm
+Clojure and have been using it in my day job for over 3 years. I'm
 aware this will make it harder for others to submit PRs, and that
 pains me a little, but look, treat it as an exercise. Clojure will
 make you a better programmer.
@@ -322,7 +323,7 @@ compatibility. Here's a list of all the changes:
 - `me.moocar.logbackgelf.GelfAppender` has been removed and replaced
   with `me.moocar.logbackgelf.GelfUDPAppender` and
   `me.moocar.logback.net.SocketEncoderAppender` (all non transport
-  information configuration is now under the `GelfLayout` Layout
+  configuration is now under the `GelfLayout` Layout)
 - **graylog2ServerHost** is now `GelfUDPAppender.remoteHost` or
   `SocketEncoderAppender.remoteHost`
 - **graylog2ServerPort** is now `GelfUDPAppender.port` or
