@@ -280,6 +280,25 @@ types are ``int``, ``long``, ``float`` and ``double``.
 If the conversion fails, logback-gelf will leave the field value alone
 (i.e.: send it as String) and print the stacktrace
 
+Tests in Clojure
+----------------
+
+Logback-gelf tests are written in [Clojure](http://clojure.org/). I
+could try and justify this by saying that the tests are better than
+they were in java, which is true, but mostly it's because I love
+Clojure and have been using it in my dayjob for over 3 years. I'm
+aware this will make it harder for others to submit PRs, and that
+pains me a little, but look, treat it as an exercise. Clojure will
+make you a better programmer.
+
+The good news is that running the tests is just as easy as before.
+Simply run `mvn test`.
+
+The other good news, is that we're now using generative testing via
+[test.check](https://github.com/clojure/test.check). Tests are
+generated based on specs and then properties are asserted. It means
+that much more of the possible value space is tested.
+
 V0.2 Changes
 ------------
 
@@ -327,6 +346,7 @@ compatibility. Here's a list of all the changes:
 - **shortMessagePattern** same as above. Note that auto truncation no
   longer occurs. You must now describe how to format the log message
   using Layouts.
+- Testing is [now in Clojure](#tests-in-clojure)
 
 Change Log
 --------------------------------------
