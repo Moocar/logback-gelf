@@ -150,7 +150,7 @@ size, this allows for 65536 bytes (64kb) total per log message.
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
 * **maxPacketSize**: The maximum number of bytes per datagram packet.
-  Once the limit is reached, packts will be chunked. Default: `512`
+  Once the limit is reached, packets will be chunked. Default: `512`
 
 **GZIP**
 
