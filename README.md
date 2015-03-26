@@ -152,7 +152,7 @@ size, this allows for 65536 bytes (64kb) total per log message.
 * **maxPacketSize**: The maximum number of bytes per datagram packet.
   Once the limit is reached, packts will be chunked. Default: `512`
 
-#### GZIP
+**GZIP**
 
 For UDP, you have the option of Gzipping the Gelf JSON before sending
 over UDP. To do this, replace the default
