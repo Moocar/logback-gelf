@@ -100,7 +100,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     public String doLayout(E event) {
         addInfo("encoding");
         Map<String, Object> map = mapFields(event);
-        addInfo("created" + map);
         String jsonString = gson.toJson(map);
         addInfo("json size" + jsonString.getBytes(Charset.forName("UTF-8")).length);
         return jsonString;

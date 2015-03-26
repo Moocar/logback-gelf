@@ -44,7 +44,7 @@ The minimal possible logback.xml you can write is something like.
 ```xml
 <configuration>
     <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
-        <encoder class="me.moocar.logbackgelf.GelfEncoder">
+        <encoder class="me.moocar.logbackgelf.GZIPEncoder">
             <layout class="me.moocar.logbackgelf.GelfLayout"/>
         </encoder>
     </appender>
@@ -63,8 +63,8 @@ default values:
     <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
         <remoteHost>somehost.com</remoteHost>
         <port>12201</port>
-        <encoder class="me.moocar.logbackgelf.GelfEncoder">
-            <layout class="me.moocar.logbackgelf.GelfLayout">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.classic.PatternLayout">
                 <!--An example of overwriting the short message pattern-->
                 <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
                     <pattern>%ex{short}%.100m</pattern>
@@ -141,15 +141,33 @@ graylog transport.
 UDP can be configured using the
 `me.moocar.logbackgelf.GelfUDPAppender` appender. Once messages reach
 a certain size, they will be chunked according to the
-[gelf spec](https://www.graylog.org/resources/gelf-2/). This allows
-for a theoretical maximum encoded log size of about 1 megabyte
-(1040384 bytes). Options include:
+[gelf spec](https://www.graylog.org/resources/gelf-2/). A maximum of
+128 chunks can be sent per log. If the encoded log is bigger than
+that, the log will be dropped. Assuming the default 512 max packet
+size, this allows for 65536 bytes (64kb) total per log message.
 
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
-* **queueSize**: The number of logs to keep in memory before a flush
-  is called (you probably won't need to change this). Default: `1024`
+* **maxPacketSize**: The maximum number of bytes per datagram packet.
+  Once the limit is reached, packts will be chunked. Default: `512`
+
+#### GZIP
+
+For UDP, you have the option of Gzipping the Gelf JSON before sending
+over UDP. To do this, replace the default
+`ch.qos.logback.core.encoder.LayoutWrappingEncoder` encoder with the
+`me.moocar.logbackgelf.GZIPEncoder` encoder. E.g
+
+```xml
+<appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+    <encoder class="me.moocar.logbackgelf.GZIPEncoder">
+        <layout class="me.moocar.logbackgelf.GelfLayout"/>
+    </encoder>
+</appender>
+```
+
+Remember, The GZIP encoder should NOT be used with TCP
 
 ### TCP
 
@@ -179,7 +197,7 @@ Then, replace the top level Gelf appender with
 
 ```xml
 <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
-    <encoder class="me.moocar.logbackgelf.GelfEncoder">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
         <layout class="me.moocar.logbackgelf.GelfLayout">
             ....
         </layout>
@@ -190,7 +208,7 @@ Then, replace the top level Gelf appender with
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
-* **queueSize**: The number of logs to keep in memory while the
+* **maxPacketSize**: The number of logs to keep in memory while the
   graylog server can't be reached. Default: `128`
 * **acceptConnectionTimeout**: Milliseconds to wait for a connection
   to be established to the server before failing. Default: `1000`
@@ -334,7 +352,7 @@ compatibility. Here's a list of all the changes:
 - **hostName** is now **host** (to be inline with Gelf spec)
 - **graylog2ServerVersion** no longer exists since it's assumed that
   you are using graylog 1.0 or above.
-- **chunkThreshold** is now hard coded. It previously defaulted to
+- **maxPacketSize** is now hard coded. It previously defaulted to
   1000 for no good reason. It is now set to 8192 bytes, inline with
   the maximum datagram GELF packet size.
 - **messagePattern** is now **fullMessageLayout** and is no longer

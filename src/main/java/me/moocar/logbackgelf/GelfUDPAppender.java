@@ -15,7 +15,7 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
     private String remoteHost;
     private int port;
-    private int queueSize = 1024;
+    private int maxPacketSize = 512;
 
     @Override
     public void start() {
@@ -69,7 +69,7 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         }
 
         if (errorCount == 0) {
-            GelfUDPOutputStream os = new GelfUDPOutputStream(address, port, queueSize, messageIdProvider);
+            GelfUDPOutputStream os = new GelfUDPOutputStream(address, port, maxPacketSize, messageIdProvider);
             try {
                 os.start();
                 this.setOutputStream(os);
@@ -86,8 +86,8 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
     @Override
     protected void writeOut(E event) throws IOException {
+        addInfo("write out");
         super.writeOut(event);
-        this.getOutputStream().flush();
     }
 
     public String getRemoteHost() {
@@ -106,11 +106,11 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         this.port = port;
     }
 
-    public int getQueueSize() {
-        return queueSize;
+    public int getMaxPacketSize() {
+        return maxPacketSize;
     }
 
-    public void setQueueSize(int queueSize) {
-        this.queueSize = queueSize;
+    public void setMaxPacketSize(int maxPacketSize) {
+        this.maxPacketSize = maxPacketSize;
     }
 }

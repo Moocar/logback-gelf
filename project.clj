@@ -19,5 +19,5 @@
                                   [org.clojure/test.check "0.7.0"]
                                   [org.powermock/powermock-api-mockito "1.5.4"]
                                   [com.stuartsierra/component "0.2.3"]
-                                  [me.moocar/socket-encoder-appender]]
+                                  [me.moocar/socket-encoder-appender "0.1-SNAPSHOT"]]
                    :resource-paths ["src/test/resources"]}})

@@ -194,7 +194,7 @@
       [:remoteHost "localhost"]
       [:port (:port (:appender config))]
       [:encoder {:name "GZIP Encoder"
-                 :class "me.moocar.logbackgelf.GelfEncoder"}
+                 :class "ch.qos.logback.core.encoder.LayoutWrappingEncoder"}
        (vec
         (concat
          [:layout {:name "Gelf Layout"
@@ -405,4 +405,6 @@
   (let [config (make-config)]
     (configure-logback-xml (xml-input-stream (logback-xml-sexp config)))
     (let [logger (LoggerFactory/getLogger "this_logger")]
-      (.debug logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {})))))
+      (dotimes [_ 10]
+        (future (.debug logger (string/join (repeatedly (* 512 5) #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {}))))
+      #_(.debug logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {})))))
