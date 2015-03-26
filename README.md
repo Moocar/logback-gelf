@@ -352,9 +352,8 @@ compatibility. Here's a list of all the changes:
 - **hostName** is now **host** (to be inline with Gelf spec)
 - **graylog2ServerVersion** no longer exists since it's assumed that
   you are using graylog 1.0 or above.
-- **maxPacketSize** is now hard coded. It previously defaulted to
-  1000 for no good reason. It is now set to 8192 bytes, inline with
-  the maximum datagram GELF packet size.
+- **chunkThreshold** is now `GelfUDPAppender.maxPacketSize` an the
+  default is 512 bytes.
 - **messagePattern** is now **fullMessageLayout** and is no longer
   assumed to be a
   [PatternLayout](http://logback.qos.ch/manual/layouts.html#ClassicPatternLayout),
