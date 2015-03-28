@@ -195,6 +195,7 @@ Then, replace the top level Gelf appender with
 
 ```xml
 <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
+    <port>12201</port>
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
         <layout class="me.moocar.logbackgelf.GelfLayout">
             ....
@@ -205,7 +206,7 @@ Then, replace the top level Gelf appender with
 
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
-* **port**: The remote graylog server port. Default: `12201`
+* **port**: The remote graylog server port. Required.
 * **maxPacketSize**: The number of logs to keep in memory while the
   graylog server can't be reached. Default: `128`
 * **acceptConnectionTimeout**: Milliseconds to wait for a connection
@@ -346,7 +347,7 @@ compatibility. Here's a list of all the changes:
 - **hostName** is now **host** (to be inline with Gelf spec)
 - **graylog2ServerVersion** no longer exists since it's assumed that
   you are using graylog 1.0 or above.
-- **chunkThreshold** is now `GelfUDPAppender.maxPacketSize` and the
+- **chunkThreshold** is now `GelfUDPAppender.maxP65507 acketSize` and the
   default is 512 bytes.
 - **messagePattern** is now **fullMessageLayout** and is no longer
   assumed to be a
