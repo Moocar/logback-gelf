@@ -11,17 +11,9 @@ to [Graylog](https://www.graylog.org/) servers.
 Dependency information
 -----------------------------------
 
-Logback-gelf is up on
-[Maven Central](http://search.maven.org/#artifactdetails%7Cme.moocar%7Clogback-gelf%7C0.12%7Cjar).
-If you're a maven user, the dependency information is below:
-
-```xml
-<dependency>
-    <groupId>me.moocar</groupId>
-    <artifactId>logback-gelf</artifactId>
-    <version>0.12</version>
-</dependency>
-```
+Logback-gelf 0.2 will eventually be up on
+[Maven Central](http://search.maven.org/#artifactdetails%7Cme.moocar%7Clogback-gelf%7C0.12%7Cjar)
+once testing is complete. For now, build it manually.
 
 Features
 --------
@@ -30,7 +22,9 @@ Features
 * MDC k/v converted to fields
 * Fields may have types
 * Auto include logger_name
-* Static fields
+* Auto include Markers
+* Auto include Thread name
+* Static fields (E.g facility)
 * Very Few dependencies (Logback and GSON)
 
 Configuring Logback
@@ -64,7 +58,7 @@ default values:
         <remoteHost>somehost.com</remoteHost>
         <port>12201</port>
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="ch.qos.logback.classic.PatternLayout">
+            <layout class="me.moocar.logbackgelf.GelfLayout">
                 <!--An example of overwriting the short message pattern-->
                 <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
                     <pattern>%ex{short}%.100m</pattern>
@@ -102,10 +96,10 @@ actually converts a log event into a GELF compatible JSON string.
 * **useLoggerName**: If true, an additional field call "_loggerName"
   will be added to each gelf message. Its contents will be the fully
   qualified name of the logger. e.g: `com.company.Thingo`. Default:
-  `false`;
+  `false`
 * **useThreadName**: If true, an additional field call "_threadName"
   will be added to each gelf message. Its contents will be the name of
-  the thread. Default: `false`;
+  the thread. Default: `false`
 * **host** The hostname of the host from which the log is being sent.
   Displayed under `source` on web interface. Default:
   `getLocalHostName()`
@@ -144,7 +138,8 @@ a certain size, they will be chunked according to the
 [gelf spec](https://www.graylog.org/resources/gelf-2/). A maximum of
 128 chunks can be sent per log. If the encoded log is bigger than
 that, the log will be dropped. Assuming the default 512 max packet
-size, this allows for 65536 bytes (64kb) total per log message.
+size, this allows for 65536 bytes (64kb) total per log message
+(unzipped).
 
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
@@ -155,7 +150,7 @@ size, this allows for 65536 bytes (64kb) total per log message.
 **GZIP**
 
 For UDP, you have the option of Gzipping the Gelf JSON before sending
-over UDP. To do this, replace the default
+over UDP. To do this, replace the
 `ch.qos.logback.core.encoder.LayoutWrappingEncoder` encoder with the
 `me.moocar.logbackgelf.GZIPEncoder` encoder. E.g
 
@@ -173,7 +168,7 @@ Remember, The GZIP encoder should NOT be used with TCP
 
 TCP transport can be configured using the
 `me.moocar.logback.net.SocketEncoderAppender` appender. Unfortunately,
-the built in
+the built in Logback
 [Socket Appender](http://logback.qos.ch/manual/appenders.html#SocketAppender)
 doesn't give you control of how logs are encoded before being sent
 over TCP, which is why you have to use this appender. To make the
@@ -183,6 +178,9 @@ if you want to use it, you'll need to add it to your dependencies too
 (sorry). Also note that due to an unresolved
 [Graylog issue](https://github.com/Graylog2/graylog2-server/issues/127),
 GZIP is not supported when using TCP.
+
+This library has not been released yet so you'll need to build it
+manually. Once testing is complete, I'll put it up on maven central.
 
 ```xml
 <dependency>
@@ -242,13 +240,9 @@ org.slf4j.MDC.put("ipAddress", getClientIpAddress());
 2.  Inform logback-gelf of MDC mapping
 
 ```xml
-...
-<appender name="GELF" class="me.moocar.logbackgelf.GelfAppender">
-    ...
+<layout class="me.moocar.logbackgelf.GelfLayout">
     <additionalField>ipAddress:_ip_address</additionalField>
-    ...
-</appender>
-...
+</layout>
 ```
 
 If the property `includeFullMDC` is set to true, all fields from the
@@ -273,12 +267,10 @@ static facility.
 E.g in the appender configuration:
 
 ```xml
-<appender class="me.moocar.logbackgelf.GelfLayout">
-    ...
+<layout class="me.moocar.logbackgelf.GelfLayout">
     <staticAdditionalField>_node_name:www013</staticAdditionalField>
     <staticAdditionalField>_facility:GELF</staticAdditionalField>
-    ...
-</appender>
+</layout>
 ```
 
 ### Field type conversion
@@ -289,11 +281,9 @@ underscore), value is the type to convert to. Currently supported
 types are ``int``, ``long``, ``float`` and ``double``.
 
 ```xml
-<appender class="me.moocar.logbackgelf.GelfLayout">
-    ...
+<layout class="me.moocar.logbackgelf.GelfLayout">
     <fieldType>_request_id:long</fieldType>
-    ...
-</appender>
+</layout>
 ```
 
 If the conversion fails, logback-gelf will leave the field value alone
@@ -317,6 +307,10 @@ The other good news, is that we're now using generative testing via
 [test.check](https://github.com/clojure/test.check). Tests are
 generated based on specs and then properties are asserted. It means
 that much more of the possible value space is tested.
+
+If you want to test interactively, you can start a repl using `mvn
+clojure:repl`, or if you want to connect via nrepl, use `mvn
+clojure:nrepl`
 
 V0.2 Changes
 ------------

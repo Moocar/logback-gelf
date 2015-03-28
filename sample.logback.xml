@@ -1,14 +1,15 @@
 <configuration>
-    <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+    <!--Use TCP instead of UDP-->
+    <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
         <remoteHost>somehost.com</remoteHost>
         <port>12201</port>
-        <encoder class="me.moocar.logbackgelf.GelfEncoder">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="me.moocar.logbackgelf.GelfLayout">
                 <!--An example of overwriting the short message pattern-->
                 <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
                     <pattern>%ex{short}%.100m</pattern>
                 </shortMessageLayout>
-                <!-- Let's create HTML output of the full message. Because, why not-->
+                <!-- Use HTML output of the full message. Yes, any layout can be used (please don't actually do this)-->
                 <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
                     <pattern>%relative%thread%mdc%level%logger%msg</pattern>
                 </fullMessageLayout>
@@ -27,6 +28,6 @@
     </appender>
 
     <root level="debug">
-        <appender-ref ref="GELF UDP APPENDER" />
+        <appender-ref ref="GELF TCP APPENDER" />
     </root>
 </configuration>
