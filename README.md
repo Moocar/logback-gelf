@@ -1,5 +1,5 @@
-LOGBACK-GELF - A GELF Appender for Logback
-==========================================
+logback-gelf
+============
 
 A [Logback](http://logback.qos.ch/) appender that encodes logs to
 [GELF](https://www.graylog.org/resources/gelf-2/) and transports them
