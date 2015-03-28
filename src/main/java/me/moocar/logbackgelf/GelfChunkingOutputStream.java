@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
 
-public class GelfUDPOutputStream extends OutputStream{
+public class GelfChunkingOutputStream extends OutputStream{
 
 
     private final int MAX_CHUNKS = 128;
@@ -26,7 +26,7 @@ public class GelfUDPOutputStream extends OutputStream{
     private boolean maxChunksReached = false;
     private byte[] messageID;
 
-    public GelfUDPOutputStream(InetAddress address, int port, int maxPacketSize, MessageIdProvider messageIdProvider) {
+    public GelfChunkingOutputStream(InetAddress address, int port, int maxPacketSize, MessageIdProvider messageIdProvider) {
         this.address = address;
         this.port = port;
         this.maxPacketSize = maxPacketSize;

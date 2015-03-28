@@ -69,7 +69,7 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         }
 
         if (errorCount == 0) {
-            GelfUDPOutputStream os = new GelfUDPOutputStream(address, port, maxPacketSize, messageIdProvider);
+            GelfChunkingOutputStream os = new GelfChunkingOutputStream(address, port, maxPacketSize, messageIdProvider);
             try {
                 os.start();
                 this.setOutputStream(os);
