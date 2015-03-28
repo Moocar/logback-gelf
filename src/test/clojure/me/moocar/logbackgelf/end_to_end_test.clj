@@ -68,7 +68,7 @@
   [config]
   {:pre [(map? config)]}
   (let [appender-type (:type (:appender config))]
-    [:configuration {:debug "true"}
+    [:configuration #_{:debug "true"}
      [:appender {:name "GELF Appender"
                  :class (get appender-classes appender-type)}
       [:remoteHost "localhost"]
@@ -178,6 +178,22 @@
   (gen/map (gen/such-that (comp pos? count) gen/string-alphanumeric)
            (gen/such-that (comp pos? count) gen/string-alphanumeric)))
 
+(def field-types
+  [["int" gen/int]
+   ["Integer" gen/int]
+   ["long" gen/int]
+   ["Long" gen/int]
+   ;; Hard to get float testing working with json serialization
+;   ["float" (gen/fmap double gen/ratio)]
+;   ["Float" (gen/fmap double gen/ratio)]
+   ["double" (gen/fmap double gen/ratio)]
+   ["Double" (gen/fmap double gen/ratio)]])
+
+(defn field-gen []
+  (gen/bind (gen/elements field-types)
+            (fn [[name gen]]
+              (gen/tuple (gen/return name) gen))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tests
 
@@ -255,22 +271,6 @@
       (.debug logger "my msg")
       (let [json (wait msg-ch)]
         (is (= "www013" (:_node_name json)))))))
-
-(def field-types
-  [["int" gen/int]
-   ["Integer" gen/int]
-   ["long" gen/int]
-   ["Long" gen/int]
-   ;; Hard to get float testing working with json serialization
-;   ["float" (gen/fmap double gen/ratio)]
-;   ["Float" (gen/fmap double gen/ratio)]
-   ["double" (gen/fmap double gen/ratio)]
-   ["Double" (gen/fmap double gen/ratio)]])
-
-(defn field-gen []
-  (gen/bind (gen/elements field-types)
-            (fn [[name gen]]
-              (gen/tuple (gen/return name) gen))))
 
 (defn t-field-types [system]
   (prop/for-all [[field-type field-val] (field-gen)
