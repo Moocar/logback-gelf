@@ -9,13 +9,20 @@ import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Created by anthony on 3/8/15.
+ * A UDP appender that sends logs to a remote UDP server. Slices messages into multiple chunks if they're too big. See
+ * GelfChunkingOutputStream for how chunking works.
+ *
+ * @param <E>
  */
 public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
-    private String remoteHost;
-    private int port;
-    private int maxPacketSize = 512;
+    private final String REMOTE_HOST = "localhost";
+    private final int DEFAULT_PORT = 12201;
+    private final int DEFAULT_MAX_PACKET_SIZE = 512;
+
+    private String remoteHost = REMOTE_HOST;
+    private int port = DEFAULT_PORT;
+    private int maxPacketSize = DEFAULT_MAX_PACKET_SIZE;
 
     @Override
     public void start() {
@@ -86,10 +93,12 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
     @Override
     protected void writeOut(E event) throws IOException {
-        addInfo("write out");
         super.writeOut(event);
     }
 
+    /**
+     * The remote host name to send logs to. Defaults to "localhost"
+     */
     public String getRemoteHost() {
         return remoteHost;
     }
@@ -98,6 +107,9 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         this.remoteHost = remoteHost;
     }
 
+    /**
+     * The remote port to send logs to. Defaults to 12201
+     */
     public int getPort() {
         return port;
     }
@@ -106,6 +118,9 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         this.port = port;
     }
 
+    /**
+     * Maximum packet size. Defaults to 512 (for a maximum 64kb log after chunking).
+     */
     public int getMaxPacketSize() {
         return maxPacketSize;
     }

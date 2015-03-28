@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Responsible for formatting a log event into a GELF message
+ * Responsible for formatting a log event into a GELF JSON string
  */
 public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
@@ -34,7 +34,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> fieldTypes = new HashMap<String, String>();
     private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
-    private int shortMessageLength = 255;
     private String host = getLocalHostName();
     private final Gson gson;
     private Layout fullMessageLayout;
@@ -61,48 +60,37 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
     public GelfLayout() {
 
-        this.additionalFields = new HashMap<String, String>();
-        this.fieldTypes = new HashMap<String, String>();
-        this.staticAdditionalFields = new HashMap<String, String>();
-
         // Init GSON for underscores
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
         this.gson = gsonBuilder.create();
     }
 
+    @Override
     public void start() {
-        if (isStarted()) return;
-        int errorCount = 0;
 
         if (fullMessageLayout == null) {
-            PatternLayout layout = new PatternLayout();
-            layout.setPattern(DEFAULT_FULL_MESSAGE_PATTERN);
-            layout.setContext(this.getContext());
-            layout.start();
-            this.fullMessageLayout = layout;
+            this.fullMessageLayout = initNewPatternLayout(DEFAULT_FULL_MESSAGE_PATTERN);
         }
 
         if (shortMessageLayout == null) {
-            PatternLayout layout = new PatternLayout();
-            layout.setPattern(DEFAULT_SHORT_MESSAGE_PATTERN);
-            layout.setContext(this.getContext());
-            layout.start();
-            this.shortMessageLayout = layout;
+            this.shortMessageLayout = initNewPatternLayout(DEFAULT_SHORT_MESSAGE_PATTERN);
         }
 
-        if (errorCount == 0) {
-            super.start();
-        }
+        super.start();
+    }
+
+    private PatternLayout initNewPatternLayout(String pattern) {
+        PatternLayout layout = new PatternLayout();
+        layout.setPattern(pattern);
+        layout.setContext(this.getContext());
+        layout.start();
+        return layout;
     }
 
     @Override
     public String doLayout(E event) {
-        addInfo("encoding");
-        Map<String, Object> map = mapFields(event);
-        String jsonString = gson.toJson(map);
-        addInfo("json size" + jsonString.getBytes(Charset.forName("UTF-8")).length);
-        return jsonString;
+        return gson.toJson(mapFields(event));
     }
 
     /**
@@ -116,17 +104,12 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
         map.put("host", host);
 
-        String message = fullMessageLayout.doLayout(logEvent);
-
-        map.put("full_message", message);
-        map.put("short_message", truncateToShortMessage(message, logEvent));
-
-        // Ever since version 0.9.6, GELF accepts timestamps in decimal form.
-        double logEventTimeTimeStamp = logEvent.getTimeStamp() / 1000.0;
+        map.put("full_message", fullMessageLayout.doLayout(logEvent));
+        map.put("short_message", shortMessageLayout.doLayout(logEvent));
 
         stackTraceField(map, logEvent);
 
-        map.put("timestamp", logEventTimeTimeStamp);
+        map.put("timestamp", logEvent.getTimeStamp() / 1000.0);
 
         map.put("version", "1.1");
 
@@ -160,7 +143,7 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
      * @param map         The map of additional fields
      * @param eventObject The Logging event that we are converting to GELF
      */
-    /* allow testing */ void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
+    private void additionalFields(Map<String, Object> map, ILoggingEvent eventObject) {
 
         if (useLoggerName) {
             map.put("_loggerName", eventObject.getLoggerName());
@@ -218,17 +201,6 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
         for (String key : staticAdditionalFields.keySet()) {
             map.put(key, (staticAdditionalFields.get(key)));
         }
-    }
-
-    private String truncateToShortMessage(String fullMessage, ILoggingEvent logEvent) {
-        if ( shortMessageLayout != null ) {
-            return shortMessageLayout.doLayout(logEvent);
-        }
-
-        if (fullMessage.length() > shortMessageLength) {
-            return fullMessage.substring(0, shortMessageLength);
-        }
-        return fullMessage;
     }
 
     private String getLocalHostName() {

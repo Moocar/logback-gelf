@@ -211,11 +211,11 @@
                    log
                    mdc))))
 
-(defn t-test [system]
+(defn t-test
   "Generate general logs and make sure they arrive on the server in
   the expected format"
-  (let [config (:config system)
-        msg-ch (:msg-ch (:server system))]
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)]
     (configure-logback config)
     (prop/for-all [log (log-gen)
                    mdc (mdc-gen)]
@@ -229,35 +229,30 @@
                (= (log->expected-json config log mdc)
                   (dissoc json :timestamp))))))))
 
-(defn t-substitute [system]
-  (let [{:keys [config server]} system
-        msg-ch (:msg-ch server)
-        string "This is a ({}) log"]
+(defn t-substitute
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)]
     (with-logger [logger config]
-      (.debug logger string "sub")
+      (.debug logger "This is a ({}) log" "sub")
       (let [json (wait msg-ch)]
         (= (:full_message json)
            "This is a (sub) log")))))
 
-(defn t-exception [system]
-  (let [{:keys [config server]} system
-        msg-ch (:msg-ch server)
-        string "my msg"
-        exception (ex-info "the exception" {})]
+(defn t-exception
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)]
     (with-logger [logger config]
-      (.error logger string exception)
+      (.error logger "my msg" (ex-info "the exception" {}))
       (let [json (wait msg-ch)]
         (is (string? (:_line json)))
         (is (string? (:_file json)))))))
 
-(defn t-static-additional-field [system]
-  (let [{:keys [config server]} system
-        msg-ch (:msg-ch server)
-        logger (LoggerFactory/getLogger "this_logger")
-        string "my msg"
+(defn t-static-additional-field
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)
         config (assoc config :static-additional-fields {"_node_name" "www013"})]
     (with-logger [logger config]
-      (.debug logger string)
+      (.debug logger "my msg")
       (let [json (wait msg-ch)]
         (is (= "www013" (:_node_name json)))))))
 
