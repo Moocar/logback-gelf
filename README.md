@@ -186,7 +186,7 @@ manually. Once testing is complete, I'll put it up on maven central.
 <dependency>
     <groupId>me.moocar</groupId>
     <artifactId>socket-encoder-appender</artifactId>
-    <version>0.1</version>
+    <version>0.1-SNAPSHOT</version>
 </dependency>
 ```
 
