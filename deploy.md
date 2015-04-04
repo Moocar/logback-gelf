@@ -1,6 +1,8 @@
 # How to deploy this library to maven central
 
-I always seem to forgt how to go about this, so here tis all documented. The [official guide] has more.
+I always seem to forgt how to go about this, so here tis all
+documented. The [official
+guide](http://central.sonatype.org/pages/ossrh-guide.html) has more.
 
 ## Before you start
 
@@ -28,7 +30,7 @@ Ensure GPG is installed and that your key details are in `~/.gnugpg`
 
 ## Release candidate to maven central
 
-1. Navigate to the [sonatype staging repositories]
+1. Navigate to the [sonatype staging repositories](https://oss.sonatype.org/index.html#stagingRepositories)
 1. Login using your credentials
 1. Go to Staging Repositories page.
 1. Select a staging repository (memoocar)
@@ -38,6 +40,3 @@ Ensure GPG is installed and that your key details are in `~/.gnugpg`
 
 The mvn release plugin will have automatically updated the project
 version and committed and pushed to origin
-
-[official guide](http://central.sonatype.org/pages/ossrh-guide.html)
-[sonatype staging repositories](https://oss.sonatype.org/index.html#stagingRepositories)
