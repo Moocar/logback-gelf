@@ -350,7 +350,7 @@ compatibility. Here's a list of all the changes:
 - **hostName** is now **host** (to be inline with Gelf spec)
 - **graylog2ServerVersion** no longer exists since it's assumed that
   you are using graylog 1.0 or above.
-- **chunkThreshold** is now `GelfUDPAppender.maxP65507 acketSize` and the
+- **chunkThreshold** is now `GelfUDPAppender.maxPacketSize` and the
   default is 512 bytes.
 - **messagePattern** is now **fullMessageLayout** and is no longer
   assumed to be a
