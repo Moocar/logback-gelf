@@ -11,9 +11,15 @@ to [Graylog](https://www.graylog.org/) servers.
 Dependency information
 -----------------------------------
 
-Logback-gelf 0.2 will eventually be up on
-[Maven Central](http://search.maven.org/#artifactdetails%7Cme.moocar%7Clogback-gelf%7C0.12%7Cjar)
-once testing is complete. For now, build it manually.
+Latest version:
+
+```xml
+<dependency>
+  <groupId>me.moocar</groupId>
+  <artifactId>logback-gelf</artifactId>
+  <version>0.2beta1</version>
+</dependency>
+```
 
 Features
 --------
