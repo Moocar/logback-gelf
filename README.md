@@ -185,14 +185,11 @@ if you want to use it, you'll need to add it to your dependencies too
 [Graylog issue](https://github.com/Graylog2/graylog2-server/issues/127),
 GZIP is not supported when using TCP.
 
-This library has not been released yet so you'll need to build it
-manually. Once testing is complete, I'll put it up on maven central.
-
 ```xml
 <dependency>
     <groupId>me.moocar</groupId>
     <artifactId>socket-encoder-appender</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1beta1</version>
 </dependency>
 ```
 
