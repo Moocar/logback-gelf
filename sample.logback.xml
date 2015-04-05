@@ -1,0 +1,33 @@
+<configuration>
+    <!--Use TCP instead of UDP-->
+    <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
+        <remoteHost>somehost.com</remoteHost>
+        <port>12201</port>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="me.moocar.logbackgelf.GelfLayout">
+                <!--An example of overwriting the short message pattern-->
+                <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%ex{short}%.100m</pattern>
+                </shortMessageLayout>
+                <!-- Use HTML output of the full message. Yes, any layout can be used (please don't actually do this)-->
+                <fullMessageLayout class="ch.qos.logback.classic.html.HTMLLayout">
+                    <pattern>%relative%thread%mdc%level%logger%msg</pattern>
+                </fullMessageLayout>
+                <useLoggerName>true</useLoggerName>
+                <useThreadName>true</useThreadName>
+                <useMarker>true</useMarker>
+                <host>Test</host>
+                <additionalField>ipAddress:_ip_address</additionalField>
+                <additionalField>requestId:_request_id</additionalField>
+                <includeFullMDC>true</includeFullMDC>
+                <fieldType>_request_id:long</fieldType>
+                <!--Facility is not officially supporte in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
+                <staticAdditionalField>_facility:GELF</staticAdditionalField>
+            </layout>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="GELF TCP APPENDER" />
+    </root>
+</configuration>

@@ -10,3 +10,6 @@ release.properties
 .classpath
 .project
 .settings/
+/lein
+/.nrepl-port
+/.lein-failures
