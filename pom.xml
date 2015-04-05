@@ -41,6 +41,14 @@
     </developer>
   </developers>
 
+  <!-- Required for clojure test depenencies -->
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+  </repositories>
+
   <dependencies>
 
     <!-- Production dependencies -->
