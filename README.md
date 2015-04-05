@@ -364,7 +364,12 @@ compatibility. Here's a list of all the changes:
 Change Log
 --------------------------------------
 
-* Development version 0.2-SNAPSHOT (current Git `master`)
+* Development version 0.2beta2-SNAPSHOT (current Git `master`)
+* Release [0.2beta1] on 2015-Apr-05
+  * Breaking change version
+  * Refactor to support multiple appenders
+  * UDP config now under GelfUDPAppender
+  * View [complete changes](https://github.com/Moocar/logback-gelf/blob/a5bce081287cf347b3220ed10e704cbb50834caa/README.md#v02-changes)
 * Release [0.12] on 2014-Nov-04
   * Explicitly set Zipper string encoding to UTF-8 [#41](../../issues/41)
 * Release [0.11] on 2014-May-18

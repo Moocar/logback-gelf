@@ -5,7 +5,7 @@
   <groupId>me.moocar</groupId>
   <artifactId>logback-gelf</artifactId>
   <packaging>jar</packaging>
-  <version>0.13-SNAPSHOT</version>
+  <version>0.2beta1-SNAPSHOT</version>
   <name>logback-gelf</name>
 
   <parent>
@@ -245,6 +245,7 @@
         </configuration>
       </plugin>
 
+      <!-- Clojure plugin to allow testing in Clojure -->
       <plugin>
         <groupId>com.theoryinpractise</groupId>
         <artifactId>clojure-maven-plugin</artifactId>

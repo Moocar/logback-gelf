@@ -1,6 +1,6 @@
 # How to deploy this library to maven central
 
-I always seem to forgt how to go about this, so here tis all
+I always seem to forget how to go about this, so here tis all
 documented. The [official
 guide](http://central.sonatype.org/pages/ossrh-guide.html) has more.
 
@@ -8,7 +8,19 @@ guide](http://central.sonatype.org/pages/ossrh-guide.html) has more.
 
 Ensure GPG is installed and that your key details are in `~/.gnugpg`
 
-## Step 1 - Update README
+You'll also need to make sure that you have configured your github login information in your `~/.m2/settings.xml`. Something like:
+
+```xml
+      <profile>
+        <id>github</id>
+        <properties>
+          <github.global.userName>username</github.global.userName>
+          <github.global.password>password</github.global.password>
+        </properties>
+      </profile>
+```
+
+## Step 1 - Update README and pom.xml
 
 - Ensure library version is set to the version you want to release, appended with "-SNAPSHOT"
 - In Changelog at bottom of README:
@@ -18,17 +30,17 @@ Ensure GPG is installed and that your key details are in `~/.gnugpg`
 - Change current version in Installation area
 - commit to master as "for release" or something
 
-## Publish snapshot to to sonatype maven repo
+## Step 2 - Publish snapshot to to sonatype maven repo
 
 `mvn clean deploy` (enter GPG passphrase)
 
-## Publish candidate to staging repo
+## Step 3 - Publish candidate to staging repo
 
 1. `mvn release:clean`
 1. `mvn release:prepare`
 1. `mvn release:perform`
 
-## Release candidate to maven central
+## Step 4 - Release candidate to maven central
 
 1. Navigate to the [sonatype staging repositories](https://oss.sonatype.org/index.html#stagingRepositories)
 1. Login using your credentials
