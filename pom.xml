@@ -5,7 +5,7 @@
   <groupId>me.moocar</groupId>
   <artifactId>logback-gelf</artifactId>
   <packaging>jar</packaging>
-  <version>0.2beta1-SNAPSHOT</version>
+  <version>0.2beta1</version>
   <name>logback-gelf</name>
 
   <parent>
@@ -99,7 +99,7 @@
     <dependency>
       <groupId>me.moocar</groupId>
       <artifactId>socket-encoder-appender</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.1beta1</version>
     </dependency>
 
     <!-- Java Test dependencies -->
