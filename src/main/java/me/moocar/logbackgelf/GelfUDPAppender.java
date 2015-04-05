@@ -47,7 +47,7 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
             try {
                 address = InternetUtils.getInetAddress(remoteHost);
             } catch (Exception e) {
-                addError("Error creating InetAddress", e);
+                addError(e.getMessage());
                 errorCount++;
             }
         }

@@ -42,16 +42,16 @@ public class InternetUtils {
     }
 
     /**
-     * Gets the Inet address for the graylog2ServerHost and gives a specialised error message if an exception is thrown
+     * Gets the Inet address for the GelfUDPAppender.remoteHost and gives a specialised error message if an exception is thrown
      *
-     * @return The Inet address for graylog2ServerHost
+     * @return The Inet address for GelfUDPAppender.remoteHost
      */
     public static InetAddress getInetAddress(String hostName) {
         try {
             return InetAddress.getByName(hostName);
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Unknown host: " + e.getMessage() +
-                    ". Make sure you have specified the 'graylog2ServerHost' property correctly in your logback.xml'");
+                    ". Make sure you have specified the 'GelfUDPAppender.remoteHost' property correctly in your logback.xml'");
         }
     }
 }
