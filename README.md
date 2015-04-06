@@ -174,27 +174,15 @@ Remember, The GZIP encoder should NOT be used with TCP
 
 TCP transport can be configured using the
 `me.moocar.logback.net.SocketEncoderAppender` appender. Unfortunately,
-the built in Logback
-[Socket Appender](http://logback.qos.ch/manual/appenders.html#SocketAppender)
+the built in Logback [Socket
+Appender](http://logback.qos.ch/manual/appenders.html#SocketAppender)
 doesn't give you control of how logs are encoded before being sent
 over TCP, which is why you have to use this appender. To make the
 system as flexible as possible, I moved this new appender into its
-[own library](https://github.com/Moocar/socket-encoder-appender), so
-if you want to use it, you'll need to add it to your dependencies too
-(sorry). Also note that due to an unresolved
-[Graylog issue](https://github.com/Graylog2/graylog2-server/issues/127),
-GZIP is not supported when using TCP.
-
-```xml
-<dependency>
-    <groupId>me.moocar</groupId>
-    <artifactId>socket-encoder-appender</artifactId>
-    <version>0.1beta1</version>
-</dependency>
-```
-
-Then, replace the top level Gelf appender with
-`me.moocar.logback.net.SocketEncoderAppender`.
+[own library](https://github.com/Moocar/socket-encoder-appender). Note
+that due to an unresolved [Graylog
+issue](https://github.com/Graylog2/graylog2-server/issues/127), GZIP
+is not supported when using TCP.
 
 ```xml
 <appender name="GELF TCP APPENDER" class="me.moocar.logback.net.SocketEncoderAppender">
