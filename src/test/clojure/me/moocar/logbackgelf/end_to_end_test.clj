@@ -57,6 +57,7 @@
    :use-marker? true
    :host "Test"
    :version "1.1"
+   :debug? false
    :appender {:type :udp
               :port 12202}
    :static-additional-fields {"_facility" "logback-gelf-test"}
@@ -68,10 +69,10 @@
   [config]
   {:pre [(map? config)]}
   (let [appender-type (:type (:appender config))]
-    [:configuration #_{:debug "true"}
+    [:configuration {:debug (str (or (:debug? config) false))}
      [:appender {:name "GELF Appender"
                  :class (get appender-classes appender-type)}
-      [:remoteHost "localhost"]
+      [:remoteHost (or (:remote-host (:appender config)) "localhost")]
       [:port (:port (:appender config))]
       [:encoder {:name "GZIP Encoder"
                  :class "ch.qos.logback.core.encoder.LayoutWrappingEncoder"}
@@ -272,6 +273,19 @@
       (let [json (wait msg-ch)]
         (is (= "www013" (:_node_name json)))))))
 
+(defn t-undefined-hostname-string
+  "Ensure that when a bad remote host is included, that an
+  appropariate error is reported to the user. Note that I can't think
+  of a way to test this programatically, so please watch the server
+  stoutput to make sure an error message is logged"
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)
+        config (-> config
+                   (assoc-in [:appender :remote-host] "GRAYLOG_SERVER_IP_IS_UNDEFINED")
+                   (assoc :debug? true))]
+    (with-logger [logger config]
+      (.debug logger "my msg"))))
+
 (defn t-field-types [system]
   (prop/for-all [[field-type field-val] (field-gen)
                  field-name (gen/not-empty gen/string-alphanumeric)]
@@ -291,6 +305,7 @@
            (t-substitute system)
            (t-exception system)
            (t-static-additional-field system)
+           (t-undefined-hostname-string system)
            (is (= true (:result (tc/quick-check 100 (t-field-types system)))))
            (is (= true (:result (tc/quick-check 100 (t-test system)))))))
 
