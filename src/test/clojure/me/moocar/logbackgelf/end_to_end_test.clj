@@ -12,7 +12,8 @@
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :refer [defspec]]
             [com.stuartsierra.component :as component]
-            [me.moocar.logbackgelf.servers :as servers])
+            [me.moocar.logbackgelf.servers :as servers]
+            [me.moocar.logbackgelf.system :as system])
   (:import (ch.qos.logback.classic.joran JoranConfigurator)
            (ch.qos.logback.classic Level)
            (ch.qos.logback.classic.spi LoggingEvent)
@@ -27,41 +28,12 @@
                (async/timeout 1000)
                ([_] (throw (ex-info "Timed out waiting for request" {})))))
 
-(defn new-test-system
-  [config]
-  (component/system-map
-   :server (servers/new-test-server config (async/chan 100))
-   :config config))
-
-(defmacro with-test-system
-  "Starts a new system"
-  [[binding-form system-map] & body]
-  `(let [system# (component/start ~system-map)
-         ~binding-form system#]
-     (try ~@body
-          (finally
-            (component/stop system#)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; xml configuration
 
 (def appender-classes
   {:udp "me.moocar.logbackgelf.GelfUDPAppender"
    :tcp "me.moocar.logback.net.SocketEncoderAppender"})
-
-(defn make-config
-  []
-  {:full-message-pattern "%rEx%m"
-   :short-message-pattern "%rEx%m"
-   :use-logger-name? true
-   :use-marker? true
-   :host "Test"
-   :version "1.1"
-   :debug? false
-   :appender {:type :udp
-              :port 12202}
-   :static-additional-fields {"_facility" "logback-gelf-test"}
-   :include-full-mdc? true})
 
 (defn logback-xml-sexp
   "Converts a configuration map into an sexpression representation of
@@ -198,15 +170,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tests
 
-(defmacro fixture [[binding-form config] & body]
-  `(let [config# ~config]
-     (with-test-system [system# (new-test-system config#)]
-       (let [~binding-form system#]
-         (try
-           ~@body
-           (finally
-             (.stop (LoggerFactory/getILoggerFactory))))))))
-
 (defn log->expected-json
   "Converts a test.check generated log into the same format it should
   be received in by the server"
@@ -301,13 +264,15 @@
                  (get json (keyword (str "_" field-name))))))))))
 
 (defn t-all []
-  (fixture [system (make-config)]
-           (t-substitute system)
-           (t-exception system)
-           (t-static-additional-field system)
-           (t-undefined-hostname-string system)
-           (is (= true (:result (tc/quick-check 100 (t-field-types system)))))
-           (is (= true (:result (tc/quick-check 100 (t-test system)))))))
+  (system/fixture
+   [system (system/make-config)]
+
+   (t-substitute system)
+   (t-exception system)
+   (t-static-additional-field system)
+   (t-undefined-hostname-string system)
+   (is (= true (:result (tc/quick-check 100 (t-field-types system)))))
+   (is (= true (:result (tc/quick-check 100 (t-test system)))))))
 
 (deftest t
   (t-all))
@@ -315,7 +280,7 @@
 (defn send-request
   "For dev purposes"
   []
-  (let [config (make-config)]
+  (let [config (system/make-config)]
     (configure-logback-xml (xml-input-stream (logback-xml-sexp config)))
     (let [logger (LoggerFactory/getLogger "this_logger")]
       (dotimes [_ 10]

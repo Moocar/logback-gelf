@@ -92,8 +92,12 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
     }
 
     @Override
-    protected void writeOut(E event) throws IOException {
-        super.writeOut(event);
+    protected void writeOut(E event) {
+        try {
+            super.writeOut(event);
+        } catch (IOException e) {
+            addError("IO Exception in UDP output stream", e);
+        }
     }
 
     /**
