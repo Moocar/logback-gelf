@@ -17,7 +17,7 @@ Latest version:
 <dependency>
   <groupId>me.moocar</groupId>
   <artifactId>logback-gelf</artifactId>
-  <version>0.2beta2</version>
+  <version>0.2beta3</version>
 </dependency>
 ```
 
@@ -355,7 +355,9 @@ compatibility. Here's a list of all the changes:
 Change Log
 --------------------------------------
 
-* Development version 0.2beta3-SNAPSHOT (current Git `master`)
+* Development version 0.2beta4-SNAPSHOT (current Git `master`)
+* Release [0.2beta3] on 2015-May-31
+  * Handle IO errors in UDP appender [#54](../../issues/54)
 * Release [0.2beta2] on 2015-Apr-06
   * added clojars repository
   * added TCP socket encoder to dependencies
