@@ -172,21 +172,8 @@
         </configuration>
       </plugin>
       <plugin>
-        <!-- be sure to add github.global.userName and github.global.password to your profile properties in settings.xml -->
-        <!-- run with mvn clean install assembly:single ghDownloads:upload -->
-        <groupId>com.github.github</groupId>
-        <artifactId>downloads-maven-plugin</artifactId>
-        <version>0.4</version>
-        <configuration>
-          <description>${project.version} release of ${project.name}</description>
-          <override>false</override>
-          <includeAttached>true</includeAttached>
-        </configuration>
-      </plugin>
-
-
-      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
         <configuration>
           <archive>
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -196,6 +183,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.5.4</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -250,11 +238,11 @@
           <archive>
             <manifestEntries>
               <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-              <Bundle-Name>${name}</Bundle-Name>
-              <Bundle-SymbolicName>${groupId}.${artifactId}.source</Bundle-SymbolicName>
+              <Bundle-Name>${project.name}</Bundle-Name>
+              <Bundle-SymbolicName>${project.groupId}.${project.artifactId}.source</Bundle-SymbolicName>
               <Bundle-Vendor>${organization.name}</Bundle-Vendor>
               <Bundle-Version>${parsedVersion.osgiVersion}</Bundle-Version>
-              <Eclipse-SourceBundle>${groupId}.${artifactId};version="${parsedVersion.osgiVersion}";roots:="."</Eclipse-SourceBundle>
+              <Eclipse-SourceBundle>${project.groupId}.${project.artifactId};version="${parsedVersion.osgiVersion}";roots:="."</Eclipse-SourceBundle>
             </manifestEntries>
           </archive>
         </configuration>
@@ -311,7 +299,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
