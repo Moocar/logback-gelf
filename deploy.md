@@ -9,20 +9,9 @@ guide](http://central.sonatype.org/pages/ossrh-guide.html) has more.
 Ensure GPG is installed and that your key details are in `~/.gnugpg`
 
 You'll also need to make sure that you have configured your sonatype
-and github login information in your `~/.m2/settings.xml`. Something
-like:
+login information in your `~/.m2/settings.xml`. Something like:
 
 ```xml
-  <profiles>
-    <profile>
-      <id>github</id>
-      <properties>
-        <github.global.userName>username</github.global.userName>
-        <github.global.password>password</github.global.password>
-      </properties>
-    </profile>
-  </profiles>
-
   <servers>
     <server>
       <id>sonatype-nexus-snapshots</id>
@@ -67,5 +56,5 @@ like:
 1. You might have to refresh to see the change
 1. Select and click release. Done!
 
-The mvn release plugin will have automatically updated the project
-version and committed and pushed to origin
+### Step 5 - push to github
+git push
