@@ -8,16 +8,33 @@ guide](http://central.sonatype.org/pages/ossrh-guide.html) has more.
 
 Ensure GPG is installed and that your key details are in `~/.gnugpg`
 
-You'll also need to make sure that you have configured your github login information in your `~/.m2/settings.xml`. Something like:
+You'll also need to make sure that you have configured your sonatype
+and github login information in your `~/.m2/settings.xml`. Something
+like:
 
 ```xml
-      <profile>
-        <id>github</id>
-        <properties>
-          <github.global.userName>username</github.global.userName>
-          <github.global.password>password</github.global.password>
-        </properties>
-      </profile>
+  <profiles>
+    <profile>
+      <id>github</id>
+      <properties>
+        <github.global.userName>username</github.global.userName>
+        <github.global.password>password</github.global.password>
+      </properties>
+    </profile>
+  </profiles>
+
+  <servers>
+    <server>
+      <id>sonatype-nexus-snapshots</id>
+      <username>sonatype-username</username>
+      <password>sonatype-password</password>
+    </server>
+    <server>
+      <id>sonatype-nexus-staging</id>
+      <username>sonatype-username</username>
+      <password>sonatype-password</password>
+    </server>
+  </servers>
 ```
 
 ## Step 1 - Update README and pom.xml
