@@ -119,10 +119,16 @@
                 {:keys [length offset data]} packet]
             (if (chunked? packet)
               (let [[chunks full-packet] (process-chunk chunks (dechunk packet))]
-                (when full-packet
-                  (>!! msg-ch (packet->json full-packet)))
+                (try
+                  (when full-packet
+                    (>!! msg-ch (packet->json full-packet)))
+                  (catch Throwable t
+                    (.printStackTrace t)))
                 (recur chunks))
-              (do (>!! msg-ch (packet->json packet))
+              (do (try
+                    (>!! msg-ch (packet->json packet))
+                    (catch Throwable t
+                      (.printStackTrace t)))
                   (recur chunks)))))))))
 
 (defn new-datagram-socket-reader
