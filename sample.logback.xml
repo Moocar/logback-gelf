@@ -21,7 +21,7 @@
                 <additionalField>requestId:_request_id</additionalField>
                 <includeFullMDC>true</includeFullMDC>
                 <fieldType>_request_id:long</fieldType>
-                <!--Facility is not officially supporte in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
+                <!--Facility is not officially supported in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
                 <staticAdditionalField>_facility:GELF</staticAdditionalField>
             </layout>
         </encoder>
