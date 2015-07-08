@@ -81,8 +81,11 @@ default values:
                 <additionalField>requestId:_request_id</additionalField>
                 <includeFullMDC>true</includeFullMDC>
                 <fieldType>_request_id:long</fieldType>
-                <!--Facility is not officially supported in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
-                <staticAdditionalField>_facility:GELF</staticAdditionalField>
+                <!--Facility is not officially supported in GELF anymore, but you can use staticFields to do the same thing-->
+                <staticField class="me.moocar.logbackgelf.Field">
+                  <key>_facility</key>
+                  <value>GELF</value>
+                </staticField>
             </layout>
         </encoder>
     </appender>
@@ -92,6 +95,7 @@ default values:
     </root>
 </configuration>
 ```
+
 ## GelfLayout
 
 `me.moocar.logbackgelf.GelfLayout`
@@ -126,9 +130,10 @@ actually converts a log event into a GELF compatible JSON string.
 * **additionalFields**: See additional fields below. Default: empty
 * **fieldType**: See field type conversion below. Default: empty
   (fields sent as string)
-* **staticAdditionalFields**: See static additional fields below.
-  Note, now that facility is deprecated, use this to set a facility
-  Default: empty
+* **staticFields**: See static fields below. Note, now that facility
+  is deprecated, use this to set a facility Default: empty
+* **staticAdditionalFields**: _deprecated_. Use staticFields. Default:
+  empty
 * **includeFullMDC**: See additional fields below. Default: `false`
 
 ## Transports
@@ -247,23 +252,36 @@ If the property `includeFullMDC` is set to false (default value) then
 only the keys listed as `additionalField` will be added to a gelf
 message.
 
-### Static Additional Fields
+### Static Fields
 
 Use static additional fields when you want to add a static key value
 pair to every GELF message. Key is the additional field key (and
 should thus begin with an underscore). The value is a static string.
 
 Now that the GELF `facility` is deprecated, this is how you add a
-static facility.
+static facility. StaticFields replace staticAdditionalFields
 
 E.g in the appender configuration:
 
 ```xml
 <layout class="me.moocar.logbackgelf.GelfLayout">
-    <staticAdditionalField>_node_name:www013</staticAdditionalField>
-    <staticAdditionalField>_facility:GELF</staticAdditionalField>
+  <staticField class="me.moocar.logbackgelf.Field">
+    <key>_facility</key>
+    <value>GELF</value>
+  </staticField>
+  <staticField class="me.moocar.logbackgelf.Field">
+    <key>_node_name</key>
+    <value>www013</value>
+  </staticField>
 </layout>
 ```
+
+### Static Additional Fields (deprecated)
+
+Static Additional fields have been deprecated and superceded by
+staticFields. While they offered a more concise way of expressing the
+key/value pair, it was impossible to include a colon in the value.
+staticFields are fully structured and don't have this problem.
 
 ### Field type conversion
 
