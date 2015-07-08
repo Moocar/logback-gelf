@@ -301,7 +301,4 @@
     (let [logger (LoggerFactory/getLogger "this_logger")]
       (dotimes [_ 10]
         (future (.debug logger (string/join (repeatedly (* 512 5) #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {}))))
-      (.debug logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {})))))
-
-(send-request)
-;; (require 'me.moocar.logbackgelf.end-to-end-test)
+      #_(.debug logger (string/join (repeatedly 30 #(rand-nth "abcdefghijklmnopqrstuvwxyz"))) #_(ex-info "ERROR ME TIMBER" {})))))
