@@ -1,0 +1,64 @@
+* ADR 1: Workers and Durable Queues
+
+What is an ADR? See Michael Nygard's [[http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions][blog post]] on thinkrelevance.com.
+
+** Context
+
+Users of logback-gelf have requested support for AMQP as a transport
+mechanism to send logs to the graylog server. AMQP stands for Advanced
+Message Queuing Protocol and is a wire-level protocol that defines a
+way for clients to send messages to eachother.
+
+Graylog 2 uses the [[https://github.com/rabbitmq/rabbitmq-java-client][rabbitmq-java-client]] which conforms to [[https://github.com/rabbitmq/rabbitmq-java-client/blob/7fdbfae74568482fcfc3795fb4d175b5c8e46da3/build.properties#L16][AMQP 0.9.1]].
+So this is the version that must be supported by logback-gelf.
+
+In version 0.2, Logback-gelf has been rewritten so that any transport
+may be configured by adding it to the classpath and configuring the
+appender. So if a logback AMQP appender already exists as a library,
+we should be able to drop it in.
+
+There is an excellent [[http://www.rabbitmq.com/tutorials/amqp-concepts.html][intro to AMQP concepts]] for RabbitMQ 0.9.1
+
+*** Graylog server AMQP implementation
+
+When Graylog server starts, it instantiates an AMQPConsumer, and runs
+it. This declares a queue using queueName and starts consuming it.
+Note, that as far as I can tell, exchange is not used, meaning it
+will fall back the default exchange that automatically creates
+routing keys for the queue name and forwards to that queue. Routing
+key also seems to be ignored
+
+This means that any implementation, simply needs to declare a queue
+calle queue-name and send message. No exchange and no explicit binding
+needs to be created.
+
+**** Defaults:
+- routingKey: "#" (ignored)
+- exchangeName: "log-messages" (ignored)
+- queueName: "log-messages"
+
+*** Spring AMQP Appender
+
+Spring have an [[http://projects.spring.io/spring-amqp/][AMQP library]] that includes a logback appender. It
+support AMQP 0.9.1. Unfortunately this library uses its own [[https://github.com/spring-projects/spring-amqp/blob/master/spring-rabbit/src/main/java/org/springframework/amqp/rabbit/logback/AmqpAppender.java#L465][layout
+implementation]] so it can't be used.
+
+*** chids/logback-messaging-appenders
+
+[[https://github.com/chids/logback-messaging-appenders][logback-messaging-appenders]] supports an AMQP appender, but also gives
+[[https://github.com/chids/logback-messaging-appenders/blob/master/amqp/src/main/java/se/pp/gustafson/marten/logback/appender/AmqpAppender.java#L104][no control]] over the encoder so can't be used.
+
+** Decision
+
+We have to create a new AMQP appender since none of the existing
+appenders give control over the encoder.
+
+** Status
+
+Proposed
+
+** Consequences
+
+We will have to write an AMQP appender from scratch. This means it
+will be lean and only do what's required, however it will be untested
+so there will probably be bugs found once it gets used in production.
