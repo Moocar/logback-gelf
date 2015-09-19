@@ -62,8 +62,12 @@
           [:additionalField "ipAddress:_ip_address"]
           [:additionalField "requestId:_request_id"]
           [:includeFullMDC (:include-full-mdc? config)]]
-         (map #(vector :staticAdditionalField (string/join ":" %))
-              (:static-additional-fields config))
+         (for [field (:static-additional-fields config)]
+           [:staticAdditionalField (string/join ":" field)])
+         (for [field (:static-fields config)]
+           [:staticField {:class "me.moocar.logbackgelf.Field"}
+            [:key (key field)]
+            [:value (val field)]])
          (map #(vector :fieldType (string/join ":" %))
               (:field-types config))))]]
      [:root {:level "all"}
@@ -236,6 +240,17 @@
       (let [json (wait msg-ch)]
         (is (= "www013" (:_node_name json)))))))
 
+(defn t-static-fields
+  [{:keys [config server] :as system}]
+  (let [msg-ch (:msg-ch server)
+        config (assoc config :static-fields {"foo" "bar"
+                                             "moo" "car"})]
+    (with-logger [logger config]
+      (.debug logger "my msg")
+      (let [json (wait msg-ch)]
+        (is (= "bar" (:foo json)))
+        (is (= "car" (:moo json)))))))
+
 (defn t-undefined-hostname-string
   "Ensure that when a bad remote host is included, that an
   appropariate error is reported to the user. Note that I can't think
@@ -270,6 +285,7 @@
    (t-substitute system)
    (t-exception system)
    (t-static-additional-field system)
+   (t-static-fields system)
    (t-undefined-hostname-string system)
    (is (= true (:result (tc/quick-check 100 (t-field-types system)))))
    (is (= true (:result (tc/quick-check 100 (t-test system)))))))

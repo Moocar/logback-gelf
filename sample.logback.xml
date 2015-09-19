@@ -22,7 +22,10 @@
                 <includeFullMDC>true</includeFullMDC>
                 <fieldType>_request_id:long</fieldType>
                 <!--Facility is not officially supported in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
-                <staticAdditionalField>_facility:GELF</staticAdditionalField>
+                <staticField class="me.moocar.logbackgelf.Field">
+                  <key>_facility</key>
+                  <value>GELF</value>
+                </staticField>
             </layout>
         </encoder>
     </appender>

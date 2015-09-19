@@ -1,24 +1,22 @@
 package me.moocar.logbackgelf;
 
-import java.lang.reflect.Method;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.classic.util.LevelToSyslogSeverity;
-
 import ch.qos.logback.core.Layout;
 import ch.qos.logback.core.LayoutBase;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.lang.reflect.Method;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Responsible for formatting a log event into a GELF JSON string
@@ -33,7 +31,7 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
     private boolean useMarker = false;
     private Map<String, String> additionalFields = new HashMap<String, String>();
     private Map<String, String> fieldTypes = new HashMap<String, String>();
-    private Map<String, String> staticAdditionalFields = new HashMap<String, String>();
+    private Map<String, String> staticFields = new HashMap<String, String>();
     private String host = getLocalHostName();
     private final Gson gson;
     private Layout fullMessageLayout;
@@ -198,8 +196,8 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
 
     private void staticAdditionalFields(Map<String,Object> map) {
 
-        for (String key : staticAdditionalFields.keySet()) {
-            map.put(key, (staticAdditionalFields.get(key)));
+        for (String key : staticFields.keySet()) {
+            map.put(key, (staticFields.get(key)));
         }
     }
 
@@ -268,12 +266,12 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
      * static additional fields to add to every gelf message. Key is the additional field key (and should thus begin
      * with an underscore). The value is a static string.
      */
-    public Map<String, String> getStaticAdditionalFields() {
-        return staticAdditionalFields;
+    public Map<String, String> getStaticFields() {
+        return staticFields;
     }
 
-    public void setStaticAdditionalFields(Map<String, String> staticAdditionalFields) {
-        this.staticAdditionalFields = staticAdditionalFields;
+    public void setStaticFields(Map<String, String> staticFields) {
+        this.staticFields = staticFields;
     }
 
     /**
@@ -337,6 +335,8 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
      *
      * @param keyValue This must be in format key:value where key is the additional field key, and value is a static
      *                 string. e.g "_node_name:www013"
+     *
+     * @deprecated Use addStaticField instead
      */
     public void addStaticAdditionalField(String keyValue) {
         String[] splitted = keyValue.split(":");
@@ -348,7 +348,15 @@ public class GelfLayout<E extends ILoggingEvent> extends LayoutBase<E> {
                     "e.g. _node_name:www013");
         }
 
-        staticAdditionalFields.put(splitted[0], splitted[1]);
+        staticFields.put(splitted[0], splitted[1]);
+    }
+
+    /**
+     * Add a static field. A static field is a key/value pair that should be sent in each Gelf message. This supercedes
+     * static additional fields, which can't have colon characters in their value.
+     */
+    public void addStaticField(Field entry) {
+        staticFields.put(entry.getKey(), entry.getValue());
     }
 
     public void addFieldType(String keyValue) {
