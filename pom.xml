@@ -72,6 +72,14 @@
       <artifactId>socket-encoder-appender</artifactId>
       <version>0.1beta1</version>
     </dependency>
+	
+	<!-- Only required during compilation, will not bring in another dependency -->
+	<dependency>
+		<groupId>org.apache.openejb</groupId>
+		<artifactId>javaee-api</artifactId>
+		<version>6.0-5</version>
+		<scope>provided</scope>
+	</dependency>
 
     <!-- Clojure Test dependencies -->
     <dependency>
