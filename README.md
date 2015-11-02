@@ -80,7 +80,7 @@ default values:
                 <additionalField>ipAddress:_ip_address</additionalField>
                 <additionalField>requestId:_request_id</additionalField>
                 <includeFullMDC>true</includeFullMDC>
-                <fieldType>_request_id:long</fieldType>
+                <fieldType>requestId:long</fieldType>
                 <!--Facility is not officially supported in GELF anymore, but you can use staticFields to do the same thing-->
                 <staticField class="me.moocar.logbackgelf.Field">
                   <key>_facility</key>
@@ -216,7 +216,7 @@ Extra features
 Additional Fields are extra k/v pairs that can be added to the GELF
 json, and thus searched as structured data using graylog. In the slf4j
 world, [MDC](http://logback.qos.ch/manual/mdc.html) (Mapped Diagnostic
-Context) is an excellent way of programattically adding fields to your
+Context) is an excellent way of programmatically adding fields to your
 GELF messages.
 
 Let's take an example of adding the ip address of the client to every
@@ -286,13 +286,13 @@ staticFields are fully structured and don't have this problem.
 ### Field type conversion
 
 You can configure a specific field to be converted to a numeric type.
-Key is the additional field key (and should thus begin with an
-underscore), value is the type to convert to. Currently supported
-types are ``int``, ``long``, ``float`` and ``double``.
+Key is the additional field key as inserted into the MDC, value is the
+type to convert to. Currently supported types are ``int``, ``long``, ``float`` and ``double``.
 
 ```xml
 <layout class="me.moocar.logbackgelf.GelfLayout">
-    <fieldType>_request_id:long</fieldType>
+    <additionalField>requestId:_request_id</additionalField>
+    <fieldType>requestId:long</fieldType>
 </layout>
 ```
 
