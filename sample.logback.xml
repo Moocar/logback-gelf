@@ -20,7 +20,7 @@
                 <additionalField>ipAddress:_ip_address</additionalField>
                 <additionalField>requestId:_request_id</additionalField>
                 <includeFullMDC>true</includeFullMDC>
-                <fieldType>_request_id:long</fieldType>
+                <fieldType>requestId:long</fieldType>
                 <!--Facility is not officially supported in GELF anymore, but you can use staticAdditionalFields to do the same thing-->
                 <staticField class="me.moocar.logbackgelf.Field">
                   <key>_facility</key>
