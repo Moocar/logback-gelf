@@ -2,7 +2,7 @@ logback-gelf
 ============
 
 A [Logback](http://logback.qos.ch/) appender that encodes logs to
-[GELF](https://www.graylog.org/resources/gelf-2/) and transports them
+[GELF](https://www.graylog.org/resources/gelf/) and transports them
 to [Graylog](https://www.graylog.org/) servers.
 
 **NOTE: Version 0.2 is NOT backwards compatible with previous versions
@@ -146,7 +146,7 @@ graylog transport.
 UDP can be configured using the
 `me.moocar.logbackgelf.GelfUDPAppender` appender. Once messages reach
 a certain size, they will be chunked according to the
-[gelf spec](https://www.graylog.org/resources/gelf-2/). A maximum of
+[gelf spec](https://www.graylog.org/resources/gelf/). A maximum of
 128 chunks can be sent per log. If the encoded log is bigger than
 that, the log will be dropped. Assuming the default 512 max packet
 size, this allows for 65536 bytes (64kb) total per log message
