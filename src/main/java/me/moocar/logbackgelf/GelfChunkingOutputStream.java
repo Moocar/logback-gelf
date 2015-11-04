@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.net.*;
 
 /**
- * An OutputStream that sends bytes as UDP packets to a [GELF](https://www.graylog.org/resources/gelf-2/) compatible
+ * An OutputStream that sends bytes as UDP packets to a [GELF](https://www.graylog.org/resources/gelf/) compatible
  * remote server. Use flush() to signify the end of a message. If the total number of bytes in the message is less than
  * maxPacketSize, they will be sent in one datagram. If more, the bytes will be broken up into GELF chunks and sent all
  * at once when flush() is called.
