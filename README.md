@@ -155,6 +155,8 @@ size, this allows for 65536 bytes (64kb) total per log message
 * **remoteHost**: The remote graylog server host to send log messages
   to (DNS or IP). Default: `"localhost"`
 * **port**: The remote graylog server port. Default: `12201`
+* **srcPort**: The source port on the local machine. Default: `0` (ephemeral
+  port)
 * **maxPacketSize**: The maximum number of bytes per datagram packet.
   Once the limit is reached, packets will be chunked. Default: `512`
 
