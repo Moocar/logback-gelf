@@ -5,8 +5,9 @@ A [Logback](http://logback.qos.ch/) appender that encodes logs to
 [GELF](https://www.graylog.org/resources/gelf/) and transports them
 to [Graylog](https://www.graylog.org/) servers.
 
-**NOTE: Version 0.2 is NOT backwards compatible with previous versions
-  (<= 0.12). [Read about the changes](#v02-changes)**
+**Disclaimer: This repo is no longer maintained as of v0.3 as I've
+  stopped using Graylog (different job). Please reach out at
+  anthony@moocar.me if you wish to take over the repo**
 
 Dependency information
 -----------------------------------
