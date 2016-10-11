@@ -7,7 +7,12 @@ to [Graylog](https://www.graylog.org/) servers.
 
 **Disclaimer: This repo is no longer maintained as of v0.3 as I've
   stopped using Graylog (different job). Please reach out at
-  anthony@moocar.me if you wish to take over the repo**
+  anthony@moocar.me if you wish to take over the repo. Some 
+  alternative GELF appenders for logback are listed below**
+  
+* [osiegmar/logback-gelf](https://github.com/osiegmar/logback-gelf)
+* [rkcpi/logback-gelf-appender](https://github.com/rkcpi/logback-gelf-appender)
+* potentially more on the [graylog marketplace](https://marketplace.graylog.org/addons?kind=gelf&tag=logback)
 
 Dependency information
 -----------------------------------
