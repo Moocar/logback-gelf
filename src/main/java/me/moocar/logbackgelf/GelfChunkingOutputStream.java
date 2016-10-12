@@ -34,6 +34,7 @@ public class GelfChunkingOutputStream extends OutputStream {
 
     private final InetAddress address;
     private final int port;
+    private final int srcPort;
     private DatagramSocket socket;
 
     // When in chunking mode, this is the index of the chunk that we are currently writing bytes to
@@ -53,21 +54,22 @@ public class GelfChunkingOutputStream extends OutputStream {
      *
      * @param address The address of the remove server
      * @param port The port of the remote server
+     * @param srcPort The source port on the local machine (use 0 for ephemeral port)
      * @param maxPacketSize The maximum number of bytes allowed before chunking begins
      * @param messageIdProvider A object that generates totally unique (for this machine) 8-byte message IDs.
      */
-    public GelfChunkingOutputStream(InetAddress address, int port, int maxPacketSize, MessageIdProvider messageIdProvider) {
+    public GelfChunkingOutputStream(InetAddress address, int port, int srcPort, int maxPacketSize, MessageIdProvider messageIdProvider) {
         this.address = address;
         this.port = port;
+        this.srcPort = srcPort;
         this.maxPacketSize = maxPacketSize;
         this.messageIdProvider = messageIdProvider;
         this.chunks = new byte[MAX_CHUNKS][maxPacketSize];
         this.packetBytes = new byte[maxPacketSize];
     }
 
-
     public void start() throws SocketException, UnknownHostException {
-        this.socket = new DatagramSocket();
+        this.socket = new DatagramSocket(srcPort);
         this.socket.connect(address, port);
     }
 

@@ -18,10 +18,12 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
     private final String REMOTE_HOST = "localhost";
     private final int DEFAULT_PORT = 12201;
+    private final int DEFAULT_SRC_PORT = 0;
     private final int DEFAULT_MAX_PACKET_SIZE = 512;
 
     private String remoteHost = REMOTE_HOST;
     private int port = DEFAULT_PORT;
+    private int srcPort = DEFAULT_SRC_PORT;
     private int maxPacketSize = DEFAULT_MAX_PACKET_SIZE;
 
     @Override
@@ -76,7 +78,7 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
         }
 
         if (errorCount == 0) {
-            GelfChunkingOutputStream os = new GelfChunkingOutputStream(address, port, maxPacketSize, messageIdProvider);
+            GelfChunkingOutputStream os = new GelfChunkingOutputStream(address, port, srcPort, maxPacketSize, messageIdProvider);
             try {
                 os.start();
                 this.setOutputStream(os);
@@ -120,6 +122,18 @@ public class GelfUDPAppender<E> extends OutputStreamAppender<E> {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    /**
+     * The source port on the local machine. Defaults to 0 (ephemeral port)
+     * @see java.net.InetSocketAddress#InetSocketAddress(int port)
+     */
+    public int getSrcPort() {
+        return srcPort;
+    }
+
+    public void setSrcPort(int srcPort) {
+        this.srcPort = srcPort;
     }
 
     /**
