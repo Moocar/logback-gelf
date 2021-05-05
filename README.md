@@ -102,6 +102,41 @@ default values:
 </configuration>
 ```
 
+An complete example for logback-access 
+
+```xml
+<configuration>
+    <appender name="GELF UDP APPENDER" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <remoteHost>somehost.com</remoteHost>
+        <port>12201</port>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="me.moocar.logbackgelf.GelfLayoutAccess">
+                <!--An example of overwriting the short message pattern-->
+                <shortMessageLayout class="ch.qos.logback.access.PatternLayout">
+                    <pattern>common</pattern>
+                </shortMessageLayout>
+                <fullMessageLayout class="ch.qos.logback.access.PatternLayout">
+                    <pattern>combined</pattern>
+                </fullMessageLayout>
+                <useThreadName>true</useThreadName>
+                <host>Test</host>
+                <staticField class="me.moocar.logbackgelf.Field">
+                  <key>application</key>
+                  <value>Your-Application</value>
+                </staticField>
+            </layout>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="GELF UDP APPENDER" />
+    </root>
+</configuration>
+```
+
+
+
 ## GelfLayout
 
 `me.moocar.logbackgelf.GelfLayout`
@@ -141,6 +176,33 @@ actually converts a log event into a GELF compatible JSON string.
 * **staticAdditionalFields**: _deprecated_. Use staticFields. Default:
   empty
 * **includeFullMDC**: See additional fields below. Default: `false`
+
+
+## GelfLayoutAccess
+
+`me.moocar.logbackgelf.GelfLayoutAccess`
+
+GelfLayoutAccess must be used if you want to use Gelf with "logback-access". For example, if you use the Tomcat LogbackValve.    
+http://logback.qos.ch/access.html#tomcat
+
+* **useThreadName**: If true, an additional field call "_threadName"
+  will be added to each gelf message. Its contents will be the name of
+  the thread. Default: `false`
+* **host** The hostname of the host from which the log is being sent.
+  Displayed under `source` on web interface. Default:
+  `getLocalHostName()`
+* **shortMessageLayout**: The
+  [Layout/logback-access](http://logback.qos.ch/manual/layouts.html#logback-access) used to create
+  the gelf `short_message` field. Shows up in the message column of
+  the log summary in the web interface. Default: `"combined"`
+  ([AccessPatternLayout](http://logback.qos.ch/manual/layouts.html#AccessPatternLayout))
+* **fullMessageLayout**: The
+  [Layout/logback-access](http://logback.qos.ch/manual/layouts.html#logback-access) used to create
+  the gelf `full_message` field. Shows up in the message field of the
+  log details in the web interface. Default: `"combined"`
+  ([AccessPatternLayout](http://logback.qos.ch/manual/layouts.html#AccessPatternLayout))
+* **staticFields**: See static fields below. Note, now that facility
+  is deprecated, use this to set a facility Default: empty
 
 ## Transports
 
